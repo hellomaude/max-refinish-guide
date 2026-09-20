@@ -65,7 +65,8 @@ has not drifted.
 
 Searched the directory on 2026-09-20 for Polymarket, Kalshi, Unusual Whales,
 CoinGlass, Alpaca, Kraken and FRED. None exists. The four dark seats run on
-direct HTTP, registered in `codex-feed/sources.yaml`:
+direct HTTP, registered in `codex-feed/sources.yaml` and implemented in
+`desk/adapters/` behind `python -m desk fetch <seat>`:
 
 | Seat | Source | Auth | Why this one |
 |---|---|---|---|

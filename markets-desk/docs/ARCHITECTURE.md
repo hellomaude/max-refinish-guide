@@ -32,8 +32,9 @@ in the same factor.
 | `ticket.py` | The ticket contract, and the risk→notional arithmetic Codex needs |
 | `risk.py` | Rails. Per-ticket gates, then water-filling allocation under theme and heat caps |
 | `sources.py` | The data-source registry and the preflight prober |
+| `adapters/` | Per-seat fetchers returning `Evidence`: Polymarket (Odds), Hyperliquid (Chain), CBOE (Pulse), EDGAR (Shadow), FRED (Ledger) |
 | `ledger.py` | Outcome scoring and the calibration check |
-| `cli.py` | `validate`, `preflight`, `stamp`, `pack`, `score` |
+| `cli.py` | `validate`, `preflight`, `fetch`, `stamp`, `pack`, `score` |
 
 Stdlib only, plus PyYAML. Every dependency is something that can break at 06:30
 on a Monday, and the desk runs on one box with no one to page.
@@ -45,6 +46,16 @@ an error-message style that reads like a schema rather than like advice. The
 contracts here are small and the messages are read by seats under time pressure,
 so `loader.check_fields` trades generality for saying "an idea you cannot be
 wrong about is not a trade" instead of "invalidation: minLength 20".
+
+## The one allowlisted POST
+
+Hyperliquid's read endpoint takes a POST body. The invariant the desk wants is
+"no mutating request", not "no POST", so rather than banning the verb and
+either losing the only funding source that works from the box or writing the
+verb obliquely to dodge the check, POST is confined to `adapters/base.py` and
+the payloads Hyperliquid may receive are pinned to a declared read-only tuple.
+PUT, PATCH and DELETE stay banned outright with no allowlist. Both rules are
+asserted in `tests/test_boundary.py`, and both were verified to trip.
 
 ## Failure posture
 

@@ -1,8 +1,9 @@
 """`python -m desk` — the desk's command line.
 
-Five verbs, each one a thing a seat or Codex actually does:
+Six verbs, each one a thing a seat or Codex actually does:
     validate   refuse a malformed book before it reaches Codex
     preflight  probe the data layer and say what is reachable
+    fetch      pull a seat's evidence, ready to paste into a ticket
     stamp      run Rails over the book and print allowances
     pack       render the Codex pack for a session
     score      report how the desk's past ideas actually did
@@ -96,6 +97,63 @@ def cmd_preflight(args: argparse.Namespace) -> int:
     if broken:
         print(f"\n{len(broken)} of {len(health)} sources unusable", file=sys.stderr)
     return 1 if broken and args.strict else 0
+
+
+def cmd_fetch(args: argparse.Namespace) -> int:
+    """Run one seat's adapters and print evidence in ticket form.
+
+    Output is deliberately paste-ready YAML rather than a report: the seat's
+    job is to put these lines into a ticket, and retyping a number is how a
+    wrong one gets in.
+    """
+    from .adapters import cboe, edgar, fred, hyperliquid, polymarket
+
+    seat = args.seat.lower()
+    results = []
+    if seat == "odds":
+        if not args.slug:
+            raise SystemExit("--slug is required for the Odds seat")
+        results.append(polymarket.fetch_market(args.slug, outcome=args.outcome))
+    elif seat == "chain":
+        result = hyperliquid.fetch_funding_oi(args.coin or ["BTC", "ETH"])
+        results.append(result)
+        if result.ok and not args.quiet:
+            for coin in args.coin or ["BTC", "ETH"]:
+                print(f"# {hyperliquid.crowding_read(result, coin)}")
+    elif seat == "pulse":
+        result = cboe.fetch_gex(args.symbol or "_SPX")
+        results.append(result)
+        if result.ok and not args.quiet:
+            print(f"# {cboe.positioning_read(result)}")
+    elif seat == "shadow":
+        if not args.cik:
+            raise SystemExit("--cik is required for the Shadow seat")
+        result = edgar.fetch_insider_cluster(args.cik, ticker=args.ticker or "")
+        results.append(result)
+        if result.ok and not args.quiet:
+            print(f"# {edgar.cluster_read(result, args.ticker or f'CIK {args.cik}')}")
+    elif seat == "ledger":
+        for name in args.series or ["10y", "2s10s"]:
+            results.append(fred.fetch_named(name))
+    else:
+        raise SystemExit(f"no adapters registered for seat {args.seat!r}")
+
+    failures = [r for r in results if not r.ok]
+    rows = [row for r in results if r.ok for row in r.as_ticket_evidence()]
+    if rows:
+        print("evidence:")
+        for row in rows:
+            print(f"  - key: {row['key']}")
+            print(f"    kind: {row['kind']}")
+            print(f"    value: {json.dumps(row['value'])}")
+            print(f"    source: {row['source']}")
+            print(f"    as_of: {row['as_of']}")
+            if row.get("url"):
+                print(f"    url: {row['url']}")
+    for result in results:
+        if result.error:
+            print(f"# {result.source_id}: {result.error}", file=sys.stderr)
+    return 1 if failures else 0
 
 
 def _render_book(book: Book) -> str:
@@ -263,6 +321,18 @@ def build_parser() -> argparse.ArgumentParser:
     p_pre.add_argument("--out", help="write a JSON health report here")
     p_pre.add_argument("--strict", action="store_true", help="exit non-zero if any source is unusable")
     p_pre.set_defaults(func=cmd_preflight)
+
+    p_fetch = sub.add_parser("fetch", help="pull a seat's evidence, ready to paste into a ticket")
+    p_fetch.add_argument("seat", help="Odds | Chain | Pulse | Shadow | Ledger")
+    p_fetch.add_argument("--slug", help="Odds: Polymarket market slug")
+    p_fetch.add_argument("--outcome", help="Odds: restrict to one outcome, e.g. No")
+    p_fetch.add_argument("--coin", action="append", help="Chain: perp symbol (repeatable)")
+    p_fetch.add_argument("--symbol", help="Pulse: CBOE chain symbol, default _SPX")
+    p_fetch.add_argument("--cik", type=int, help="Shadow: SEC CIK")
+    p_fetch.add_argument("--ticker", help="Shadow: label for the evidence keys")
+    p_fetch.add_argument("--series", action="append", help="Ledger: FRED series or shorthand")
+    p_fetch.add_argument("--quiet", action="store_true", help="evidence only, no read line")
+    p_fetch.set_defaults(func=cmd_fetch)
 
     p_stamp = sub.add_parser("stamp", help="run Rails over the book")
     common(p_stamp)

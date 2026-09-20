@@ -39,8 +39,16 @@ FORBIDDEN_CALLS = (
     "withdraw",
 )
 
-# Writing HTTP verbs at all is a smell in a read-only data layer.
-FORBIDDEN_METHODS = ("POST", "PUT", "PATCH", "DELETE")
+# PUT, PATCH and DELETE are banned outright, everywhere, with no allowlist.
+FORBIDDEN_METHODS = ("PUT", "PATCH", "DELETE")
+
+# POST is a different case. The invariant the desk wants is "no mutating
+# request", not "no POST" — Hyperliquid's read endpoint takes a POST body, and
+# refusing the verb outright would mean either losing the only funding source
+# that works from this box, or writing the verb obliquely to dodge the check.
+# So POST is confined to one module and the payloads it may send are pinned
+# below. Widening either is a visible diff.
+POST_ALLOWED_FILES = {"desk/adapters/base.py"}
 
 
 def _python_files() -> list[Path]:
@@ -59,6 +67,35 @@ class ExecutionBoundaryTests(unittest.TestCase):
                     if needle in line and not stripped.startswith("#"):
                         offenders.append(f"{path.relative_to(ROOT)}:{i}: {needle}")
         self.assertEqual(offenders, [], "order-placing machinery in a research package")
+
+    def test_post_is_confined_to_the_allowlisted_module(self):
+        offenders: list[str] = []
+        for path in _python_files():
+            relative = str(path.relative_to(ROOT))
+            if relative in POST_ALLOWED_FILES:
+                continue
+            for i, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+                if '"POST"' in line or "'POST'" in line:
+                    offenders.append(f"{relative}:{i}")
+        self.assertEqual(offenders, [], "POST outside the allowlisted module")
+
+    def test_read_only_request_payloads_are_pinned(self):
+        """Every body an adapter sends must come from its declared read set."""
+        from desk.adapters import hyperliquid
+
+        self.assertEqual(
+            hyperliquid.READ_ONLY_REQUESTS,
+            ("metaAndAssetCtxs", "meta", "allMids", "fundingHistory"),
+            "the Hyperliquid read allowlist changed; confirm every entry is a read",
+        )
+        source = (PACKAGE / "adapters" / "hyperliquid.py").read_text(encoding="utf-8")
+        # The only body construction in the module must index that tuple.
+        for i, line in enumerate(source.splitlines(), start=1):
+            if "body=" in line:
+                self.assertIn(
+                    "READ_ONLY_REQUESTS", line,
+                    f"desk/adapters/hyperliquid.py:{i} sends a body not drawn from the read allowlist",
+                )
 
     def test_the_http_layer_only_reads(self):
         """No module may issue a mutating HTTP request."""
@@ -83,6 +120,16 @@ class ExecutionBoundaryTests(unittest.TestCase):
             r"(?im)^\s*(?:api[_-]?key|secret|token|password|private[_-]?key)\s*:\s*\S+", text
         )
         self.assertEqual(suspicious, [], "credential literal in sources.yaml")
+
+    def test_adapter_endpoints_are_https(self):
+        import re as _re
+
+        for path in _python_files():
+            for url in _re.findall(r"[\"']((?:http|ftp)[^\"'\s]*)[\"']", path.read_text(encoding="utf-8")):
+                self.assertTrue(
+                    url.startswith("https://"),
+                    f"{path.relative_to(ROOT)} references a non-https endpoint: {url}",
+                )
 
     def test_registry_urls_are_https(self):
         from desk.sources import load_sources

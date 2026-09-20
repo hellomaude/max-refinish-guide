@@ -27,6 +27,7 @@ Each is now a mechanism: `MODE.yaml`, the staleness gate, and the ledger.
 codex-feed/MODE.yaml     desk policy — modes, caps, themes, event windows, freshness
 codex-feed/sources.yaml  every upstream, who owns it, what to fall back to
 desk/                    the implementation (stdlib only, plus PyYAML)
+desk/adapters/           per-seat fetchers: Polymarket, Hyperliquid, CBOE, EDGAR, FRED
 tickets/*.ticket.yaml    the book
 ledger/*.outcome.yaml    what happened, for scoring
 ```
@@ -36,10 +37,24 @@ ledger/*.outcome.yaml    what happened, for scoring
 ```bash
 python -m desk validate     # refuse a malformed book before Codex sees it
 python -m desk preflight    # probe every source; name what is dark and why
+python -m desk fetch Chain  # pull a seat's evidence, paste-ready
 python -m desk stamp        # Rails over the whole book at once
 python -m desk pack --out … # render the Codex pack
 python -m desk score        # realised hit rate, expectancy and calibration
 ```
+
+`fetch` covers the four seats no connector serves:
+
+```bash
+python -m desk fetch Odds   --slug clarity-act-signed-2026 --outcome No
+python -m desk fetch Chain  --coin BTC --coin ETH
+python -m desk fetch Pulse  --symbol _SPX
+python -m desk fetch Shadow --cik 883902 --ticker SBLK
+python -m desk fetch Ledger --series 2s10s
+```
+
+Output is paste-ready ticket YAML rather than a report, because retyping a
+number is how a wrong one gets in.
 
 `stamp` runs over the whole book deliberately. A ticket's allowance depends on
 what else competes for the same theme cap, so tickets cannot be sized one at a
@@ -70,18 +85,25 @@ pip install pyyaml
 python -m unittest discover -s tests -t .
 ```
 
-81 tests, no network. `tests/test_boundary.py` is the one that matters most: it
-fails the build if order-placing machinery, signing material or a mutating HTTP
-verb appears in the package, or if the shipped policy arms a venue. Lifting a
-ban means deleting an assertion, which shows up in review.
+133 tests, no network — every upstream is a fixture. `tests/test_boundary.py`
+is the one that matters most: it fails the build if order-placing machinery or
+signing material appears in the package, if PUT/PATCH/DELETE shows up anywhere,
+if POST escapes its one allowlisted module, if a Hyperliquid request body comes
+from outside the declared read-only set, or if the shipped policy arms a venue.
+Lifting a ban means deleting an assertion, which shows up in review.
 
 ## Status
 
-Working and tested: policy, ticket contract, Rails engine, source registry and
-prober, ledger, CLI, CI. Still to come: per-seat source adapters that turn the
-registry into fetched evidence, and the equity-venue decision in
+Complete and tested: policy, ticket contract, Rails engine, source registry and
+prober, the five seat adapters, ledger, CLI, CI.
+
+One decision is still Max's: the equity venue. `MODE.yaml` keeps `equity` and
+`etf` disabled and IBKR unarmed, and `tests/test_boundary.py` pins
+`research_packs_only` so arming one is a deliberate diff. See
 [`docs/MIGRATION.md`](docs/MIGRATION.md).
 
-The 18 registered sources are written against documented APIs but **unverified** —
-this session's egress blocked every market-data host. Run `python -m desk
-preflight` on the desk box before any seat relies on them.
+**The adapters are unverified against live endpoints.** This session's egress
+blocked every market-data host, so they are written against documented response
+shapes and tested against fixtures. Run `python -m desk preflight` and then each
+`fetch` on the desk box before a seat leans on them; expect to adjust a field
+name or two where an upstream has drifted.
