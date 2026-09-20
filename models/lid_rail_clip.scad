@@ -2,7 +2,7 @@
 // tank's top trim, so the lid is held without adhesive, screws or drilled
 // glass. Four to six per tank. Set `lift` above zero if you would rather run a
 // deliberate perimeter gap than a louvred intake plate.
-// Print with the saddle opening facing up.
+// Print on its side, length flat on the bed: both slots become vertical voids.
 
 include <common.scad>
 

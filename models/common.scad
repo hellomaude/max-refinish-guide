@@ -8,9 +8,7 @@ $fn = 96;
 glass_t  = 6;      // tank wall glass thickness. 20-long / 29 gal is usually 5-6 mm.
 rim_w    = 14;     // width of the plastic top trim, front to back
 rim_h    = 16;     // height of the plastic top trim
-lid_t    = 3;      // chamber lid sheet thickness. 3 mm polycarbonate default.
-panel_t  = 3;      // chamber wall sheet thickness
-deck_t   = 18;     // deck sheet thickness: the tank's cap and the chamber's floor
+lid_t    = 3;      // lid sheet thickness. 3 mm polycarbonate is the default.
 duct_nom = 101.6;  // 4 in duct. Use 152.4 for a 6 in fan.
 probe_d  = 10;     // sensor-probe body diameter
 cable_d  = 6;      // fattest cable that must pass through the lid
@@ -50,7 +48,8 @@ module corner_holes(x, y, inset, hole_d, depth) {
 // `outer_foot` extends the outer wall down the outside glass: that is what
 // stops a hanging load from levering the part off the rim. Put a strip of EVA
 // foam between the foot and the glass.
-// Print with the opening facing up, no supports.
+// Each part that uses this picks its own print orientation; see the table in
+// README.md rather than assuming one here.
 module rim_saddle(len = 40, jaw = rim_w, depth = rim_h * 0.8, t = wall,
                   outer_foot = 0) {
     union() {

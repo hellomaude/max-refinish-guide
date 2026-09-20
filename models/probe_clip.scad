@@ -1,7 +1,7 @@
 // probe_clip.scad — holds the controller's temperature/humidity probe at
 // canopy height instead of letting it dangle in the warmest air at the lid.
 // Saddle grips the tank's top trim; the arm sets the height; the C-clip takes
-// the probe body. Print with the saddle opening facing up.
+// the probe body. Print on its side, flat back down: no bridging, no supports.
 
 include <common.scad>
 
