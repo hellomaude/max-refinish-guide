@@ -1,6 +1,6 @@
 # Max’s Table + Bathroom Cabinet Refinish Guide
 
-Mobile-first Max Motif field guide for repainting the table Whisper White, protecting the warped bathroom cabinet while keeping its wood natural, and building an automated grow box out of a glass aquarium.
+Mobile-first Max Motif field guide for repainting the table Whisper White, protecting the warped bathroom cabinet while keeping its wood natural, and building an automated grow box that stands on a dry glass aquarium.
 
 Includes an interactive shopping checklist, researched manufacturer instructions, embedded YouTube tutorials, downloadable PDFs, and parametric OpenSCAD sources for the printed grow-box parts in [`models/`](models/).
 
@@ -10,7 +10,7 @@ Includes an interactive shopping checklist, researched manufacturer instructions
 |---|---|---|
 | 1 | Dining table | Painted Whisper White, satin cabinet enamel |
 | 2 | Bathroom cabinet | Natural wood, clear water-based topcoat |
-| 3 | Aquarium grow box | AC Infinity light, fan and controller + printed lid parts |
+| 3 | Grow box on a tank base | Dry tank as ballasted pedestal, deck, chamber, AC Infinity climate gear + printed parts |
 
 ## Grow box assets
 
