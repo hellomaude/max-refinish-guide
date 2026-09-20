@@ -1,0 +1,172 @@
+# Max Motif Markets Desk — machine-readable desk policy.
+#
+# This file replaces prose MODE.md as the *authority*. MODE.md stays as the
+# narrative for humans; if the two disagree, this file wins, because this file
+# is what Rails actually executes.
+#
+# Changing anything here changes what the desk is allowed to propose. Treat an
+# edit like a trade: Max gates it.
+
+schema_version: 2
+
+# halt | research_only | paper | live_confirm
+mode: live_confirm
+
+# research_packs_only | paper_sheets | broker_sheets
+execution: research_packs_only
+
+updated_at: 2026-09-20T09:00:00-07:00
+
+caps:
+  # All percentages are of the risk budget (capital at risk), never notional.
+  # Codex converts % -> notional from each ticket's entry/stop.
+  portfolio_heat_pct: 3.0
+  single_name_pct: 1.0
+  default_theme_pct: 1.5
+
+# Confidence buys a fraction of the single-name cap. The slope is deliberately
+# steep at the bottom: a 1/5 idea is research output, not a position.
+# These numbers are a prior, not a result — desk/ledger.py exists to tell you
+# whether the slope is earning anything, and this ladder should be re-cut from
+# realised expectancy once roughly 30 tickets have resolved.
+conviction_ladder:
+  1: 0.00
+  2: 0.20
+  3: 0.40
+  4: 0.70
+  5: 1.00
+
+# Correlated ideas share a cap. Order matters: the first theme whose members
+# match a symbol wins, so put the tightest bucket first.
+#
+# A single-name override is just a one-member theme — that is how SBLK and RWT
+# carry their own ceilings without a second mechanism.
+themes:
+  - id: insider_shipping
+    cap_pct: 0.75
+    members: [SBLK]
+    note: >-
+      Capped until Shadow confirms the Form 4 cluster against the EDGAR
+      primary documents rather than an aggregator's summary.
+
+  - id: insider_smallcap
+    cap_pct: 0.25
+    members: [RWT]
+    note: Thin float; size is the risk control, not the stop.
+
+  - id: crypto_policy_beta
+    cap_pct: 1.5
+    members:
+      - COIN
+      - HOOD
+      - MSTR
+      - MARA
+      - RIOT
+      - IBIT
+      - FBTC
+      - ETHA
+      - BTC
+      - BTC-USD
+      - ETH
+      - ETH-USD
+      - clarity-act-*
+      - crypto-market-structure-*
+    note: >-
+      Crypto-equity, spot/perp crypto and US crypto-policy prediction markets
+      are one factor, not three. September 15 proved it: a single Senate
+      cloture vote moved all three legs together. Sizing them independently is
+      how a 0.5% idea becomes 1.5% of correlated exposure.
+
+  - id: rates_macro
+    cap_pct: 1.0
+    members: [SPY, QQQ, IWM, TLT, ES, NQ, VIX, UUP]
+    note: Index and rates expressions around scheduled macro prints.
+
+venues:
+  # enabled=false means Rails refuses any ticket routed there, whatever else
+  # the ticket says. This is the execution boundary, expressed as data.
+  equity:
+    enabled: false
+    live: false
+    note: >-
+      No equity venue named. Equity ideas may be researched and stamped but
+      cannot be turned into order sheets. Arm this only by naming a broker
+      here and moving execution to broker_sheets.
+  etf:
+    enabled: false
+    live: false
+    note: Same as equity — no venue named.
+  kraken:
+    enabled: true
+    live: false
+    note: Paper and intel only. No live crypto orders until Max arms them.
+  polymarket:
+    enabled: true
+    live: false
+    note: >-
+      Gamma + CLOB read paths only. PublicClient, never SecureClient. No POST
+      to /order under any circumstances.
+  crypto_spot:
+    enabled: true
+    live: false
+    note: Read-only pricing; routed to Kraken paper for any sheet.
+  crypto_perp:
+    enabled: false
+    live: false
+    note: >-
+      Perp venues are read-only intel for funding and open interest. The desk
+      does not size perp positions.
+  option:
+    enabled: false
+    live: false
+    note: No options venue named, and the greeks feed is not yet trustworthy.
+
+# Scheduled catalysts that suppress risk around them. A window bites when it
+# overlaps a ticket's holding horizon, so an intraday idea and a swing idea
+# are treated differently by the same rule.
+event_windows:
+  - id: us-flash-pmi-2026-09-23
+    starts_at: 2026-09-22T12:55:00-07:00
+    ends_at: 2026-09-23T07:30:00-07:00
+    overnight_risk_pct: 0.0
+    max_pct_around_event: 1.0
+    applies_to_kinds: [equity, etf, crypto_spot, crypto_perp, option]
+    note: >-
+      Flat into the Wednesday flash PMI. Nothing that marks to market carries
+      overnight through the Tuesday session; anything expressed around the
+      print is capped at 1.0%. Scoped to gapping instruments on purpose — a
+      defined-risk binary resolving in December cannot be flattened into a
+      Wednesday print, and pretending otherwise just zeroes good tickets.
+
+  - id: cost-earnings-2026-09-24
+    starts_at: 2026-09-24T12:55:00-07:00
+    ends_at: 2026-09-25T07:00:00-07:00
+    overnight_risk_pct: 0.0
+    max_pct_around_event: 0.5
+    applies_to_kinds: [equity, etf, option]
+    note: COST reports Thursday after the close; no overnight gap risk.
+
+# How old a piece of evidence may be before Rails refuses to lean on it,
+# in hours. The keys are evidence `kind` values on tickets.
+#
+# `options_greeks` is 20h on purpose: anything longer lets a feed frozen at
+# Friday's expiry underwrite a Monday position, which is precisely what the
+# Monday checklist caught by hand.
+staleness_hours:
+  default: 72
+  price: 24
+  options_greeks: 20
+  funding_oi: 8
+  liquidations: 12
+  etf_flow: 96
+  order_book: 2
+  filing: 720
+  macro_print: 720
+  legislative: 336
+  news: 72
+  social: 48
+
+# Seats whose report must be present before Rails will hand out size.
+# Missing seat -> PENDING, never a silent pass.
+required_seats:
+  - Rails
