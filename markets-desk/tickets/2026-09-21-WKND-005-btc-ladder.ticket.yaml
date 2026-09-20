@@ -1,0 +1,59 @@
+# STUB. Transcribed from the weekend pack's summary row.
+schema_version: 2
+id: WKND-005
+created_at: 2026-09-21T06:00:00-07:00
+source_seats: [Chain]
+
+instrument:
+  kind: crypto_spot
+  symbol: BTC
+  venue: crypto_spot
+
+direction: long
+theme: crypto_policy_beta
+
+thesis: >-
+  STUB, awaiting Chain. The weekend pack held a BTC accumulation ladder at
+  PENDING, gated on Chain's own model showing better than 55-60% odds for the
+  continuation case. The separate September 20 dated binary in that row is
+  dead: Rails marked it FAIL and the date has passed. Only the ladder survives
+  as an open question, and it is open precisely because the model number has
+  not been produced.
+
+catalyst: >-
+  Chain's Monday 06:30 PT re-pull and the cash open. Funding and open interest
+  read calm rather than crowded on Friday, and the liquidations were a short
+  flush, so there is no positioning story yet either way.
+catalyst_at: 2026-09-21T06:30:00-07:00
+
+invalidation: >-
+  BTC losing $80k, or Chain's model coming in below 55%. Also invalid if
+  funding turns crowded long, which would mean the continuation is paying to
+  exist rather than being underpriced.
+
+horizon: swing
+size_hint_pct: 0.0
+confidence: 1
+
+evidence: []
+
+sources:
+  - tickets/2026-09-20-chain-tag.md
+  - tickets/2026-09-20-mon-open-checklist.md
+
+rails_check: pending
+max_gate: true
+
+notes: >-
+  Chain fills this with:
+
+      python -m desk fetch Chain --coin BTC --coin ETH
+
+  Hyperliquid needs no key and is not geo-blocked, so this works from the box
+  where Binance and Bybit do not. Rails capped the ladder at 0.5% and only
+  with room left under the 1.5% crypto_policy_beta theme cap — which COIN,
+  HOOD and WKND-002 are also drawing on, so the engine will share it out.
+
+  Note the Wednesday PMI window applies to this one: crypto_spot is a gapping
+  instrument, so a swing horizon into the print gets zeroed on the overnight
+  rule. Either express it intraday or accept that Rails will refuse it.
