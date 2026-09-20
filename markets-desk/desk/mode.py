@@ -95,6 +95,7 @@ class Mode:
     venues: dict[str, Venue]
     staleness_hours: dict[str, float]
     required_seats: tuple[str, ...] = ()
+    require_challenge: bool = False
     raw: Mapping[str, Any] = field(default_factory=dict, repr=False)
 
     # -- lookups ---------------------------------------------------------
@@ -144,6 +145,7 @@ _MODE_SPECS = (
     FieldSpec("venues", dict, required=False),
     FieldSpec("staleness_hours", dict, required=False),
     FieldSpec("required_seats", list, required=False, item_kind=str),
+    FieldSpec("require_challenge", bool, required=False),
 )
 
 _CAP_SPECS = (
@@ -294,6 +296,7 @@ def parse_mode(doc: Mapping[str, Any], *, where: str = "MODE.yaml") -> Mode:
         venues=venues,
         staleness_hours=staleness,
         required_seats=tuple(doc.get("required_seats") or ()),
+        require_challenge=bool(doc.get("require_challenge", False)),
         raw=doc,
     )
 

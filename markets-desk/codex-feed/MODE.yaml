@@ -170,3 +170,8 @@ staleness_hours:
 # Missing seat -> PENDING, never a silent pass.
 required_seats:
   - Rails
+
+# No ticket carries size until the adversary seat has argued against it.
+# Jev may not originate tickets; see docs/SEATS.md. An unchallenged ticket is
+# PENDING, not a pass — the desk does not size a thesis nobody attacked.
+require_challenge: true

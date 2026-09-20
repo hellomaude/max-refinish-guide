@@ -158,6 +158,31 @@ class ExecutionBoundaryTests(unittest.TestCase):
         mode = load_mode(ROOT / "codex-feed" / "MODE.yaml")
         self.assertEqual(mode.execution, "research_packs_only")
 
+    def test_the_adversary_never_originates_a_ticket(self):
+        """The rule that makes the seat credible.
+
+        A seat that proposes cannot attack, and a seat that scores its own
+        ideas will always find they were nearly right. Jev appearing in
+        source_seats means the separation has collapsed.
+        """
+        from desk.ticket import load_tickets
+
+        for ticket in load_tickets(ROOT / "tickets"):
+            self.assertNotIn(
+                "jev", [s.lower() for s in ticket.source_seats],
+                f"{ticket.id} lists Jev as a source seat; the adversary may not propose",
+            )
+
+    def test_every_challenge_is_answerable(self):
+        """An objection nothing could settle is an opinion, not a challenge."""
+        from desk.challenge import load_challenges
+
+        for challenge in load_challenges(ROOT / "challenges").values():
+            self.assertTrue(
+                challenge.what_would_change_my_mind.strip(),
+                f"{challenge.ticket_id}: challenge names nothing that would settle it",
+            )
+
     def test_every_ticket_carries_the_max_gate(self):
         from desk.ticket import load_tickets
 

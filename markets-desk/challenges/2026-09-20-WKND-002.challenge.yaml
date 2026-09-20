@@ -1,0 +1,45 @@
+schema_version: 2
+ticket_id: WKND-002
+challenger: Jev
+challenged_at: 2026-09-20T18:20:00-07:00
+
+verdict: contest
+confidence_adjustment: -1
+
+strongest_counter: >-
+  The legislative read is right and the trade is still bad. Buying No at 92.5c
+  risks 92.5 to make 7.5 — you need better than 92.5% accuracy just to break
+  even, and the ticket claims 96-98% off a chain of judgements about floor time
+  and lame-duck appetite, not off anything observable. That leaves three to five
+  cents of claimed edge on a market whose spread and fees eat a meaningful part
+  of it. Worse, the tail is not diffuse: dead bills get attached to year-end
+  must-pass vehicles, which is the single most likely revival path and the one
+  the thesis waves at rather than prices. And the ticket's own exit rule is
+  unexecutable — on a book this thin, "exit, do not average" means selling into
+  the same headline that just repriced you, at 60c, not at 85c. This is a
+  short-vol carry position. The desk has no sizing regime for short vol, and
+  dropping one into a directional book under a conviction ladder built for
+  stops is how a 0.4% line becomes the only loss that mattered this quarter.
+
+what_would_change_my_mind: >-
+  Two things, both checkable. First, CLOB depth: show me more than $5k resting
+  within two cents of the midpoint on the No side, which would mean the exit
+  rule is real. Second, a count of 119th-Congress bills that failed cloture and
+  were subsequently enacted via a year-end vehicle. If that base rate is under
+  2%, the 7.5c is genuinely rich and I will concede. If it is nearer 8%, the
+  market is priced correctly and there is no trade in either direction.
+
+missed_invalidation: >-
+  The ticket lists a re-filed cloture motion and attachment to a must-pass
+  vehicle, but not the slower killer: No drifting to 97-98c on nothing at all.
+  At that point the remaining carry no longer compensates the tail, and the
+  position should be closed for being finished rather than for being wrong.
+
+evidence_disputed:
+  - yes_price
+
+notes: >-
+  Not disputing the cloture facts — those are well sourced and the Yes side is
+  dead. Disputing that a dead Yes automatically makes a live No. The ticket
+  reasons its way to a correct conclusion about the legislation and then treats
+  that as a conclusion about the trade, which it is not.

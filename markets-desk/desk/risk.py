@@ -15,6 +15,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Iterable, Mapping, Sequence
 
+from .challenge import Challenge
 from .mode import Mode
 from .ticket import Evidence, Ticket
 
@@ -59,6 +60,11 @@ class Stamp:
     reasons: list[str] = field(default_factory=list)
     stale_evidence: list[str] = field(default_factory=list)
     missing_seats: list[str] = field(default_factory=list)
+    challenge_verdict: str = ""
+    # Conviction after Jev's adjustment. Also the weight used when a theme or
+    # the heat cap has to be shared, so a contested ticket loses twice: once on
+    # the ladder and again on its claim to scarce budget.
+    effective_confidence: int = 0
 
     @property
     def blocked(self) -> bool:
@@ -122,6 +128,7 @@ def _ceiling_for(
     now: datetime,
     open_risk: OpenRisk,
     available_seats: set[str],
+    challenge: Challenge | None = None,
 ) -> Stamp:
     """Per-ticket gates. Each one may only lower the allowance."""
     theme = mode.theme_for(ticket.instrument.label()) or mode.theme_for(ticket.instrument.symbol)
@@ -133,6 +140,8 @@ def _ceiling_for(
         allowed_pct=ticket.size_hint_pct,
         theme=theme_id,
         binding_constraint="size_hint",
+        challenge_verdict=challenge.verdict if challenge else "",
+        effective_confidence=ticket.confidence,
     )
 
     def clamp(limit: float, name: str, note: str = "") -> None:
@@ -180,6 +189,23 @@ def _ceiling_for(
         stamp.reasons.append("waiting on seat report(s): " + ", ".join(missing))
         return stamp
 
+    # --- the adversary ---------------------------------------------------
+    if mode.require_challenge and challenge is None:
+        stamp.verdict = PENDING
+        stamp.allowed_pct = 0.0
+        stamp.binding_constraint = "unchallenged"
+        stamp.reasons.append(
+            "no challenge on record; the desk does not size a thesis nobody argued against"
+        )
+        return stamp
+
+    if challenge is not None and challenge.kills:
+        stamp.verdict = FAIL
+        stamp.allowed_pct = 0.0
+        stamp.binding_constraint = "challenge.kill"
+        stamp.reasons.append(f"Jev killed it: {challenge.strongest_counter}")
+        return stamp
+
     if ticket.rails_check == FAIL:
         stamp.verdict = FAIL
         stamp.allowed_pct = 0.0
@@ -192,11 +218,20 @@ def _ceiling_for(
         stamp.reasons.append("ticket is marked pending; allowance is provisional")
 
     # --- soft ceilings --------------------------------------------------
-    ladder = mode.conviction_ladder[ticket.confidence]
+    confidence = ticket.confidence
+    if challenge is not None and challenge.confidence_adjustment:
+        confidence = max(1, confidence + challenge.confidence_adjustment)
+        stamp.reasons.append(
+            f"challenged: conviction {ticket.confidence} -> {confidence} "
+            f"({_gist(challenge.strongest_counter)})"
+        )
+    stamp.effective_confidence = confidence
+
+    ladder = mode.conviction_ladder[confidence]
     clamp(
         mode.single_name_pct * ladder,
-        f"conviction[{ticket.confidence}]",
-        f"confidence {ticket.confidence} earns {ladder:.0%} of the single-name cap",
+        f"conviction[{confidence}]",
+        f"confidence {confidence} earns {ladder:.0%} of the single-name cap",
     )
     already = open_risk.symbol(ticket.instrument.symbol)
     clamp(
@@ -264,6 +299,18 @@ def _water_fill(cap: float, items: Sequence[tuple[str, float, float]]) -> dict[s
     return granted
 
 
+def _gist(text: str, limit: int = 140) -> str:
+    """First sentence of an argument, for a one-line reason.
+
+    The full counter belongs in the pack, where there is room to read it; a
+    stamp table that wraps for ten lines stops being scannable.
+    """
+    first = text.strip().split(". ")[0].strip().rstrip(".")
+    if len(first) <= limit:
+        return first
+    return first[: limit - 1].rsplit(" ", 1)[0] + "…"
+
+
 def _floor_to_quantum(value: float) -> float:
     """Round down to the sizing quantum. Rounding up would breach a cap."""
     if value <= 0:
@@ -278,6 +325,7 @@ def stamp_book(
     now: datetime,
     open_risk: OpenRisk | None = None,
     available_seats: Iterable[str] | None = None,
+    challenges: Mapping[str, Challenge] | None = None,
 ) -> Book:
     """Stamp a whole book at once.
 
@@ -289,8 +337,12 @@ def stamp_book(
     open_risk = open_risk or OpenRisk()
     seats = set(available_seats or mode.required_seats)
 
-    stamps = [_ceiling_for(t, mode, now, open_risk, seats) for t in tickets]
+    challenges = challenges or {}
+    stamps = [
+        _ceiling_for(t, mode, now, open_risk, seats, challenges.get(t.id)) for t in tickets
+    ]
     by_id = {t.id: t for t in tickets}
+    weight_of = {s.ticket_id: float(max(1, s.effective_confidence)) for s in stamps}
 
     # --- theme caps -----------------------------------------------------
     theme_allowed: dict[str, float] = {}
@@ -299,7 +351,7 @@ def stamp_book(
         cap = max(0.0, mode.cap_for_theme(theme_id) - open_risk.theme(theme_id))
         shares = _water_fill(
             cap,
-            [(s.ticket_id, s.allowed_pct, float(by_id[s.ticket_id].confidence)) for s in members],
+            [(s.ticket_id, s.allowed_pct, weight_of[s.ticket_id]) for s in members],
         )
         for stamp in members:
             share = shares[stamp.ticket_id]
@@ -317,7 +369,7 @@ def stamp_book(
     heat_cap = max(0.0, mode.portfolio_heat_pct - open_risk.total)
     shares = _water_fill(
         heat_cap,
-        [(s.ticket_id, s.allowed_pct, float(by_id[s.ticket_id].confidence)) for s in stamps],
+        [(s.ticket_id, s.allowed_pct, weight_of[s.ticket_id]) for s in stamps],
     )
     for stamp in stamps:
         share = shares[stamp.ticket_id]

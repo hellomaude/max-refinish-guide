@@ -196,6 +196,77 @@ def calibration_report(outcomes: Iterable[Outcome]) -> list[str]:
     return lines or ["calibration: expectancy rises with confidence as intended"]
 
 
+def challenge_report(
+    outcomes: Iterable[Outcome],
+    challenges: Mapping[str, Any],
+) -> list[str]:
+    """Is the adversary seat earning its place?
+
+    The test is whether contested tickets went on to do worse than the ones Jev
+    let through. If they did, the objections were carrying information and the
+    conviction docking was correct. If contested tickets did just as well, Jev
+    is taxing the book for nothing and the seat needs recalibrating, not
+    respect.
+
+    Killed tickets cannot be scored — they were never taken, and the desk does
+    not get to know what would have happened. That is a real blind spot and is
+    reported rather than papered over.
+    """
+    contested: list[float] = []
+    cleared: list[float] = []
+    killed = 0
+
+    for outcome in outcomes:
+        held = challenges.get(outcome.ticket_id)
+        if held is not None and getattr(held, "kills", False):
+            killed += 1
+            continue
+        if not outcome.resolved:
+            continue
+        value = float(outcome.result_r or 0.0)
+        if held is not None and getattr(held, "contests", False):
+            contested.append(value)
+        else:
+            cleared.append(value)
+
+    lines: list[str] = []
+    if killed:
+        lines.append(
+            f"challenges: {killed} ticket(s) killed and therefore unscoreable — "
+            "the desk cannot see what it avoided"
+        )
+    if len(contested) < 3 or len(cleared) < 3:
+        lines.append(
+            f"challenges: too thin to judge (contested n={len(contested)}, "
+            f"cleared n={len(cleared)}); needs 3+ resolved on each side"
+        )
+        return lines
+
+    contested_mean = statistics.fmean(contested)
+    cleared_mean = statistics.fmean(cleared)
+    gap = cleared_mean - contested_mean
+    lines.append(
+        f"challenges: contested {contested_mean:+.2f}R (n={len(contested)}) vs "
+        f"cleared {cleared_mean:+.2f}R (n={len(cleared)})"
+    )
+    if gap > 0.25:
+        lines.append(
+            f"challenges: Jev is earning its seat — objections ran {gap:.2f}R worse, "
+            "so the conviction docking is working"
+        )
+    elif gap < -0.25:
+        lines.append(
+            "challenges: Jev is inverted — contested tickets outperformed the ones it "
+            "cleared. It is taxing good ideas; recut the seat before trusting it further"
+        )
+    else:
+        lines.append(
+            "challenges: Jev's objections are not separating winners from losers. "
+            "The seat is costing size without buying information"
+        )
+    return lines
+
+
 def write_csv(scores: Sequence[SeatScore], path: str | Path) -> Path:
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)

@@ -1,9 +1,10 @@
 """`python -m desk` — the desk's command line.
 
-Six verbs, each one a thing a seat or Codex actually does:
+Seven verbs, each one a thing a seat or Codex actually does:
     validate   refuse a malformed book before it reaches Codex
     preflight  probe the data layer and say what is reachable
     fetch      pull a seat's evidence, ready to paste into a ticket
+    challenge  list what Jev has not argued against yet
     stamp      run Rails over the book and print allowances
     pack       render the Codex pack for a session
     score      report how the desk's past ideas actually did
@@ -17,7 +18,14 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from .ledger import calibration_report, load_outcomes, score as score_outcomes, write_csv
+from .challenge import load_challenges, unchallenged
+from .ledger import (
+    calibration_report,
+    challenge_report,
+    load_outcomes,
+    score as score_outcomes,
+    write_csv,
+)
 from .loader import DeskError, ValidationError
 from .mode import load_mode
 from .risk import Book, OpenRisk, stamp_book
@@ -29,6 +37,7 @@ DEFAULT_MODE = ROOT / "codex-feed" / "MODE.yaml"
 DEFAULT_TICKETS = ROOT / "tickets"
 DEFAULT_SOURCES = ROOT / "codex-feed" / "sources.yaml"
 DEFAULT_OUTCOMES = ROOT / "ledger"
+DEFAULT_CHALLENGES = ROOT / "challenges"
 
 
 def _now(value: str | None) -> datetime:
@@ -67,6 +76,18 @@ def cmd_validate(args: argparse.Namespace) -> int:
         print(f"sources   ok   {len(sources)} registered")
     except (DeskError, OSError) as exc:
         problems.append(f"sources: {exc}")
+
+    try:
+        challenges = load_challenges(args.challenges)
+        print(f"challenge ok   {len(challenges)} on record")
+    except (DeskError, OSError) as exc:
+        problems.append(f"challenges: {exc}")
+        challenges = {}
+
+    if mode is not None and mode.require_challenge:
+        missing = unchallenged([t.id for t in tickets], challenges)
+        for ticket_id in missing:
+            print(f"PENDING   {ticket_id}: awaiting Jev", file=sys.stderr)
 
     if mode is not None:
         for ticket in tickets:
@@ -156,6 +177,23 @@ def cmd_fetch(args: argparse.Namespace) -> int:
     return 1 if failures else 0
 
 
+def cmd_challenge(args: argparse.Namespace) -> int:
+    """What the adversary still owes the desk."""
+    tickets = load_tickets(args.tickets)
+    challenges = load_challenges(args.challenges)
+    pending = unchallenged([t.id for t in tickets], challenges)
+
+    for ticket in tickets:
+        held = challenges.get(ticket.id)
+        if held:
+            print(held.line())
+        else:
+            print(f"{ticket.id}: UNCHALLENGED — {ticket.instrument.label()} ({ticket.direction})")
+    if pending:
+        print(f"\n{len(pending)} ticket(s) awaiting Jev: {', '.join(pending)}", file=sys.stderr)
+    return 1 if pending else 0
+
+
 def _render_book(book: Book) -> str:
     lines = [
         f"# Rails stamp — {book.stamped_at:%Y-%m-%d %H:%M UTC}",
@@ -163,12 +201,13 @@ def _render_book(book: Book) -> str:
         f"mode `{book.mode}` · execution `{book.execution}` · "
         f"allocated {book.portfolio_allowed_pct:.2f}% of a {book.portfolio_cap_pct:.2f}% heat cap",
         "",
-        "| ticket | verdict | asked | allowed | binding constraint |",
-        "|---|---|---:|---:|---|",
+        "| ticket | verdict | Jev | asked | allowed | binding constraint |",
+        "|---|---|---|---:|---:|---|",
     ]
     for stamp in book.ranked():
+        jev = stamp.challenge_verdict or "—"
         lines.append(
-            f"| {stamp.ticket_id} | {stamp.verdict.upper()} | {stamp.requested_pct:.2f}% "
+            f"| {stamp.ticket_id} | {stamp.verdict.upper()} | {jev} | {stamp.requested_pct:.2f}% "
             f"| **{stamp.allowed_pct:.2f}%** | {stamp.binding_constraint} |"
         )
     lines.append("")
@@ -196,6 +235,7 @@ def cmd_stamp(args: argparse.Namespace) -> int:
         now=_now(args.now),
         open_risk=_open_risk(args.open_risk),
         available_seats=args.seat or None,
+        challenges=load_challenges(args.challenges),
     )
     if args.json:
         payload = {
@@ -229,7 +269,9 @@ def cmd_pack(args: argparse.Namespace) -> int:
     mode = load_mode(args.mode)
     tickets = load_tickets(args.tickets)
     now = _now(args.now)
-    book = stamp_book(tickets, mode, now=now, open_risk=_open_risk(args.open_risk))
+    challenges = load_challenges(args.challenges)
+    book = stamp_book(tickets, mode, now=now, open_risk=_open_risk(args.open_risk),
+                      challenges=challenges)
     by_id = {t.id: t for t in tickets}
 
     out = [
@@ -256,6 +298,17 @@ def cmd_pack(args: argparse.Namespace) -> int:
             f"- **Invalidation:** {ticket.invalidation}",
             "",
         ]
+        held = challenges.get(ticket.id)
+        if held:
+            out += [
+                f"**Jev ({held.verdict}, conviction {held.confidence_adjustment:+d}):** "
+                f"{held.strongest_counter}",
+                "",
+                f"*Would change its mind:* {held.what_would_change_my_mind}",
+                "",
+            ]
+            if held.missed_invalidation:
+                out += [f"*Invalidation the author missed:* {held.missed_invalidation}", ""]
         if ticket.evidence:
             out.append("| evidence | value | source | as of |")
             out.append("|---|---|---|---|")
@@ -295,6 +348,9 @@ def cmd_score(args: argparse.Namespace) -> int:
     print()
     for line in calibration_report(outcomes):
         print(line)
+    print()
+    for line in challenge_report(outcomes, load_challenges(args.challenges)):
+        print(line)
     if args.csv:
         write_csv(score_outcomes(outcomes, dimension="seat"), args.csv)
         print(f"\nwrote {args.csv}")
@@ -308,11 +364,16 @@ def build_parser() -> argparse.ArgumentParser:
     def common(p: argparse.ArgumentParser) -> None:
         p.add_argument("--mode", default=str(DEFAULT_MODE))
         p.add_argument("--tickets", default=str(DEFAULT_TICKETS))
+        p.add_argument("--challenges", default=str(DEFAULT_CHALLENGES))
 
     p_validate = sub.add_parser("validate", help="structurally check mode, tickets and sources")
     common(p_validate)
     p_validate.add_argument("--sources", default=str(DEFAULT_SOURCES))
     p_validate.set_defaults(func=cmd_validate)
+
+    p_challenge = sub.add_parser("challenge", help="list tickets Jev has not argued against")
+    common(p_challenge)
+    p_challenge.set_defaults(func=cmd_challenge)
 
     p_pre = sub.add_parser("preflight", help="probe every registered data source")
     p_pre.add_argument("--sources", default=str(DEFAULT_SOURCES))
@@ -352,6 +413,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_score = sub.add_parser("score", help="report realised performance from the ledger")
     p_score.add_argument("--tickets", default=str(DEFAULT_TICKETS))
     p_score.add_argument("--outcomes", default=str(DEFAULT_OUTCOMES))
+    p_score.add_argument("--challenges", default=str(DEFAULT_CHALLENGES))
     p_score.add_argument("--csv")
     p_score.set_defaults(func=cmd_score)
 

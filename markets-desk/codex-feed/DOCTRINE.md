@@ -8,6 +8,7 @@ of it is now enforced by code rather than remembered.
 | Role | Does | Never |
 |---|---|---|
 | Research seats — Wire, Ledger, Chain, Odds, Pulse, Shadow, Rails, CoS | Information, briefs, tickets | Place trades, move money, connect wallets, post unsupervised |
+| Jev — the adversary | Challenges: the case against every ticket | Originate a ticket, or add conviction to one |
 | Codex | Owns the trade-ticket and execution path | Fire live capital without Max's confirmation |
 | Max | Approves every capital action | — |
 
@@ -37,14 +38,26 @@ refused if it has:
 - any timestamp without a timezone,
 - `max_gate` anything other than true.
 
+## The adversary
+
+No ticket carries size until Jev has argued against it. An unchallenged ticket
+is PENDING, a killed one FAILs, and a contested one is docked conviction before
+any cap applies.
+
+Jev may not originate tickets — a seat that proposes cannot credibly attack,
+and the boundary test fails the build if it appears in a ticket's
+`source_seats`. Its adjustment can only subtract, because an adversary that can
+add conviction is just another proposer. Full contract in `docs/SEATS.md`.
+
 ## How sizing is decided
 
 Rails stamps the **whole book at once**, because a ticket's allowance depends
 on what else competes for its theme cap. The gates, in order, each able only to
 reduce:
 
-1. halt mode, disabled venue, stale evidence, missing seat report — hard stops
-2. conviction ladder → a fraction of the single-name cap
+1. halt mode, disabled venue, stale evidence, missing seat report, no
+   challenge on record, or a challenge that kills — hard stops
+2. conviction ladder, after Jev's docking → a fraction of the single-name cap
 3. single-name cap, less what is already on
 4. event windows — the around-event cap, and the overnight cap for anything
    held past the close
