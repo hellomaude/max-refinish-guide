@@ -15,7 +15,14 @@ Includes an interactive shopping checklist, researched manufacturer instructions
 ## Grow box assets
 
 The page looks for four concept renders that are not committed to this repo:
-`assets/growbox-hero.jpg`, `growbox-canopy.jpg`, `growbox-airflow.jpg`,
-`growbox-parts.jpg`. They hide themselves when missing, so the page renders
+
+| Filename | Shot |
+|---|---|
+| `assets/growbox-hero.jpg` | The whole unit on a bench, humidifier beside it |
+| `assets/growbox-lid.jpg` | The lid lifted off, all its hardware visible |
+| `assets/growbox-canopy.jpg` | Interior, mist running along the glass |
+| `assets/growbox-parts.jpg` | The printed parts laid out |
+
+Each figure removes itself when its file is missing, so the page renders
 correctly either way — drop the files in with those names and they appear.
-The airflow cross-section on the page is hand-authored SVG and always renders.
+The cross-section diagram on the page is hand-authored SVG and always renders.
