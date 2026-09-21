@@ -40,6 +40,11 @@ SOFT_KINDS = ("social", "news", "sentiment")
 
 READS = ("clear", "mixed", "no_read")
 
+# How well-known an idea already is. This is the structured form of the most
+# valuable thing a social seat can say, and it is always bad news: an idea that
+# is already consensus has less edge left than the author thinks.
+CROWDING = ("differentiated", "consensus", "crowded")
+
 
 @dataclass(frozen=True)
 class SeatReport:
@@ -51,9 +56,18 @@ class SeatReport:
     headline: str
     evidence: tuple[Evidence, ...]
     covers: tuple[str, ...] = ()
+    crowding: Mapping[str, str] = field(default_factory=dict)
+    excluded_sources: tuple[str, ...] = ()
     unavailable: tuple[str, ...] = ()
     notes: str = ""
     raw: Mapping[str, Any] = field(default_factory=dict, repr=False)
+
+    def crowding_for(self, symbol: str) -> str | None:
+        needle = symbol.strip().lower()
+        for key, value in self.crowding.items():
+            if key.strip().lower() == needle:
+                return value
+        return None
 
     @property
     def has_read(self) -> bool:
@@ -76,6 +90,8 @@ _SPECS = (
     FieldSpec("headline", str),
     FieldSpec("evidence", list, item_kind=dict),
     FieldSpec("covers", list, required=False, item_kind=str),
+    FieldSpec("crowding", dict, required=False),
+    FieldSpec("excluded_sources", list, required=False, item_kind=str),
     FieldSpec("unavailable", list, required=False, item_kind=str),
     FieldSpec("notes", str, required=False),
 )
@@ -113,6 +129,20 @@ def parse_report(doc: Mapping[str, Any], *, where: str = "report") -> SeatReport
             "read: 'no_read' must say why — list what was unavailable, or explain in notes"
         )
 
+    crowding: dict[str, str] = {}
+    for symbol, level in (doc.get("crowding") or {}).items():
+        if level not in CROWDING:
+            extra.append(
+                f"crowding.{symbol}: {level!r} not one of {list(CROWDING)}"
+            )
+            continue
+        crowding[str(symbol)] = level
+    unknown = sorted(set(crowding) - {str(c) for c in (doc.get("covers") or [])})
+    if unknown:
+        extra.append(
+            f"crowding: names not in `covers`: {unknown} — assess only what you looked at"
+        )
+
     evidence: list[Evidence] = []
     for i, item in enumerate(doc["evidence"]):
         bad = check_fields(item, _EVIDENCE_SPECS, where=f"{where}:evidence[{i}]")
@@ -143,6 +173,8 @@ def parse_report(doc: Mapping[str, Any], *, where: str = "report") -> SeatReport
         headline=headline,
         evidence=tuple(evidence),
         covers=tuple(doc.get("covers") or ()),
+        crowding=crowding,
+        excluded_sources=tuple(doc.get("excluded_sources") or ()),
         unavailable=tuple(doc.get("unavailable") or ()),
         notes=doc.get("notes", ""),
         raw=doc,

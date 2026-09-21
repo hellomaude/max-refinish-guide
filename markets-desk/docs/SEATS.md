@@ -180,6 +180,15 @@ their errors correlate through shared training data and shared sources. Two
 models disagreeing is not signal either; it is a tie with no tiebreak. Grok
 earns its seat on **capability the desk lacks**, not on being a second vote.
 
+### Its standing brief
+
+[`codex-feed/BRIEF-GROK.md`](../codex-feed/BRIEF-GROK.md) is the instruction to
+paste into Grok Bot. The short version: its highest-value output is bearish on
+the desk's own ideas, so its primary customer is Jev rather than Wire. A social
+seat used to find trades is a hype machine — it hands you whatever is loudest,
+which is whatever is already priced. Used to check whether an idea is already
+crowded, it is a real edge.
+
 ### How it connects
 
 Not through an API. Grok files reports into `reports/` in the
@@ -218,8 +227,14 @@ What Grok *can* do, which is valuable: tell Wire an event is being priced
 before it shows in the tape, flag that a thesis is consensus rather than
 differentiated, and notice when chatter stops — as above, weakly.
 
-**Refused if** it files a `clear` read with no evidence, or reports volume
-without a baseline. "Lots of mentions" is not a number.
+**Files** a `crowding` call per covered symbol — `differentiated`, `consensus`
+or `crowded` — which is the structured form of its most valuable output and is
+always bad news for the ticket. Also `excluded_sources`, since the desk bans
+pumper accounts and should see what was filtered rather than only the residue.
+
+**Refused if** it files a `clear` read with no evidence, rates the crowding of
+a name it did not look at, or reports volume without a baseline. "Lots of
+mentions" is not a number.
 
 **Cadence** weekdays 06:30 with Chain, and on demand when Wire has an event
 with no obvious instrument.

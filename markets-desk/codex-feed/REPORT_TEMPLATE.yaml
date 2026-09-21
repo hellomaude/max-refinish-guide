@@ -19,6 +19,17 @@ headline: >-
 
 covers: [BTC, ETH]
 
+# Social seats only (see codex-feed/BRIEF-GROK.md). How well-known the idea
+# already is: differentiated | consensus | crowded. You may only rate names
+# listed in `covers`.
+# crowding:
+#   BTC: differentiated
+
+# Sources you deliberately excluded — the desk bans pumper accounts and should
+# see what you filtered, not just the residue.
+# excluded_sources:
+#   - "@somepumper (paid promotion pattern)"
+
 evidence:
   # `as_of` is when the fact was true, not when you fetched it.
   #

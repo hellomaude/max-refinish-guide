@@ -202,6 +202,10 @@ def cmd_challenge(args: argparse.Namespace) -> int:
     pending = unchallenged([t.id for t in tickets], challenges)
 
     for ticket in tickets:
+        for _, report in sorted(reports.items()):
+            level = report.crowding_for(ticket.instrument.symbol)
+            if level:
+                out += [f"- **{report.seat} crowding:** {level}", ""]
         held = challenges.get(ticket.id)
         if held:
             print(held.line())
@@ -325,6 +329,10 @@ def cmd_pack(args: argparse.Namespace) -> int:
             f"- **Invalidation:** {ticket.invalidation}",
             "",
         ]
+        for _, report in sorted(reports.items()):
+            level = report.crowding_for(ticket.instrument.symbol)
+            if level:
+                out += [f"- **{report.seat} crowding:** {level}", ""]
         held = challenges.get(ticket.id)
         if held:
             out += [

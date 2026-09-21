@@ -89,6 +89,33 @@ class ContractTests(unittest.TestCase):
         self.assertEqual(seats_reporting(reports), {"Chain"})
 
 
+class CrowdingTests(unittest.TestCase):
+    """The social seat's most valuable field, and its guard rails."""
+
+    def test_a_crowding_call_is_recorded(self):
+        report = build_report(crowding={"BTC": "differentiated", "ETH": "consensus"})
+        self.assertEqual(report.crowding_for("btc"), "differentiated")
+        self.assertEqual(report.crowding_for("ETH"), "consensus")
+        self.assertIsNone(report.crowding_for("SOL"))
+
+    def test_an_unknown_level_is_refused(self):
+        with self.assertRaises(ValidationError) as caught:
+            build_report(crowding={"BTC": "very loud"})
+        self.assertIn("not one of", str(caught.exception))
+
+    def test_rating_a_name_you_did_not_look_at_is_refused(self):
+        with self.assertRaises(ValidationError) as caught:
+            build_report(covers=["BTC"], crowding={"SOL": "crowded"})
+        self.assertIn("assess only what you looked at", str(caught.exception))
+
+    def test_excluded_sources_are_carried(self):
+        report = build_report(excluded_sources=["@somepumper (paid promotion pattern)"])
+        self.assertIn("somepumper", report.excluded_sources[0])
+
+    def test_crowding_is_optional(self):
+        self.assertEqual(build_report().crowding, {})
+
+
 class EvidenceClassTests(unittest.TestCase):
     def test_the_two_classes_do_not_overlap(self):
         self.assertFalse(set(HARD_KINDS) & set(SOFT_KINDS))
