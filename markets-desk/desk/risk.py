@@ -17,6 +17,7 @@ from typing import Iterable, Mapping, Sequence
 
 from .challenge import Challenge
 from .mode import Mode
+from .report import has_hard_evidence
 from .ticket import Evidence, Ticket
 
 PASS = "pass"
@@ -187,6 +188,22 @@ def _ceiling_for(
         stamp.allowed_pct = 0.0
         stamp.binding_constraint = "required_seats"
         stamp.reasons.append("waiting on seat report(s): " + ", ".join(missing))
+        return stamp
+
+    # --- evidence quality ------------------------------------------------
+    # Soft evidence corroborates, it does not originate. A ticket asking for
+    # size on social and news alone has no falsifiable content: its
+    # invalidation would have to be "people stopped saying it", which is not a
+    # level anyone can watch. A ticket asking for nothing is exempt, because it
+    # is not claiming anything yet.
+    if ticket.size_hint_pct > 0 and not has_hard_evidence(ticket.evidence):
+        stamp.verdict = FAIL
+        stamp.allowed_pct = 0.0
+        stamp.binding_constraint = "soft_evidence_only"
+        stamp.reasons.append(
+            "no hard evidence: a thesis resting only on what people are saying "
+            "cannot be sized, however loud they are"
+        )
         return stamp
 
     # --- the adversary ---------------------------------------------------

@@ -19,6 +19,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from .challenge import load_challenges, unchallenged
+from .report import load_reports, seats_reporting
 from .ledger import (
     calibration_report,
     challenge_report,
@@ -38,6 +39,7 @@ DEFAULT_TICKETS = ROOT / "tickets"
 DEFAULT_SOURCES = ROOT / "codex-feed" / "sources.yaml"
 DEFAULT_OUTCOMES = ROOT / "ledger"
 DEFAULT_CHALLENGES = ROOT / "challenges"
+DEFAULT_REPORTS = ROOT / "reports"
 
 
 def _now(value: str | None) -> datetime:
@@ -83,6 +85,22 @@ def cmd_validate(args: argparse.Namespace) -> int:
     except (DeskError, OSError) as exc:
         problems.append(f"challenges: {exc}")
         challenges = {}
+
+    try:
+        reports = load_reports(args.reports)
+        filed = seats_reporting(reports)
+        print(f"reports   ok   {len(reports)} filed, {len(filed)} with a read")
+        for name, report in sorted(reports.items()):
+            if report.unavailable:
+                print(f"DARK      {name}: {', '.join(report.unavailable)}", file=sys.stderr)
+    except (DeskError, OSError) as exc:
+        problems.append(f"reports: {exc}")
+        reports = {}
+
+    if mode is not None:
+        missing = [s for s in mode.required_seats if s not in seats_reporting(reports)]
+        for seat in missing:
+            print(f"PENDING   required seat has not filed: {seat}", file=sys.stderr)
 
     if mode is not None and mode.require_challenge:
         missing = unchallenged([t.id for t in tickets], challenges)
@@ -234,7 +252,7 @@ def cmd_stamp(args: argparse.Namespace) -> int:
         mode,
         now=_now(args.now),
         open_risk=_open_risk(args.open_risk),
-        available_seats=args.seat or None,
+        available_seats=args.seat or (seats_reporting(load_reports(args.reports)) or None),
         challenges=load_challenges(args.challenges),
     )
     if args.json:
@@ -270,8 +288,10 @@ def cmd_pack(args: argparse.Namespace) -> int:
     tickets = load_tickets(args.tickets)
     now = _now(args.now)
     challenges = load_challenges(args.challenges)
+    reports = load_reports(args.reports)
     book = stamp_book(tickets, mode, now=now, open_risk=_open_risk(args.open_risk),
-                      challenges=challenges)
+                      challenges=challenges,
+                      available_seats=seats_reporting(reports) or None)
     by_id = {t.id: t for t in tickets}
 
     out = [
@@ -279,6 +299,13 @@ def cmd_pack(args: argparse.Namespace) -> int:
         "",
         f"Desk is `{mode.mode}` / `{mode.execution}`. Research only; Max gates every order.",
         "",
+        *(
+            ["## Seat reads", ""]
+            + [f"- {r.line()}" for _, r in sorted(reports.items())]
+            + [""]
+            if reports
+            else []
+        ),
         _render_book(book),
         "",
         "## Tickets",
@@ -365,6 +392,7 @@ def build_parser() -> argparse.ArgumentParser:
         p.add_argument("--mode", default=str(DEFAULT_MODE))
         p.add_argument("--tickets", default=str(DEFAULT_TICKETS))
         p.add_argument("--challenges", default=str(DEFAULT_CHALLENGES))
+        p.add_argument("--reports", default=str(DEFAULT_REPORTS))
 
     p_validate = sub.add_parser("validate", help="structurally check mode, tickets and sources")
     common(p_validate)

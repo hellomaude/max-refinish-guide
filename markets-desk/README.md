@@ -30,6 +30,7 @@ desk/                    the implementation (stdlib only, plus PyYAML)
 desk/adapters/           per-seat fetchers: Polymarket, Hyperliquid, CBOE, EDGAR, FRED
 tickets/*.ticket.yaml    the book
 challenges/*.challenge.yaml  Jev's case against each ticket
+reports/*.report.yaml    each seat's read for the session
 ledger/*.outcome.yaml    what happened, for scoring
 ```
 
@@ -72,6 +73,13 @@ every leg at once.
 **A single-name override is a one-member theme.** SBLK's 0.75% and RWT's 0.25%
 are themes with one member, not a second mechanism.
 
+**Talk cannot be sized.** A ticket asking for size must rest on at least one
+hard fact — a price, filing, funding rate, greek, macro print, depth reading,
+flow or legislative action. Social, news and sentiment corroborate but never
+originate, because a thesis built on chatter has no falsifiable content. This
+is what lets a social seat like Grok contribute without a loud timeline
+becoming a position.
+
 **Nothing carries size until it has been argued against.** Jev, the adversary
 seat, challenges every ticket before Rails stamps it; a contested ticket is
 docked conviction automatically and a killed one fails. Jev may not originate
@@ -94,7 +102,7 @@ pip install pyyaml
 python -m unittest discover -s tests -t .
 ```
 
-158 tests, no network — every upstream is a fixture. `tests/test_boundary.py`
+174 tests, no network — every upstream is a fixture. `tests/test_boundary.py`
 is the one that matters most: it fails the build if order-placing machinery or
 signing material appears in the package, if PUT/PATCH/DELETE shows up anywhere,
 if POST escapes its one allowlisted module, if a Hyperliquid request body comes

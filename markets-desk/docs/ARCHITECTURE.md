@@ -3,9 +3,11 @@
 ## Shape
 
 ```
-seats research  →  tickets/*.ticket.yaml  →  Rails (desk/risk.py)  →  Codex pack  →  Max
-                          ↑                        ↑
-                   evidence with as_of        codex-feed/MODE.yaml
+seats research  →  reports/*.report.yaml
+      ↓                    ↓
+tickets/*.ticket.yaml  →  Rails (desk/risk.py)  →  Codex pack  →  Max
+      ↑                        ↑
+evidence with as_of      codex-feed/MODE.yaml
                           ↑
                  codex-feed/sources.yaml  →  preflight prober
                                                     ↓
@@ -30,6 +32,7 @@ in the same factor.
 | `loader.py` | Load YAML/JSON, hand-rolled field checking, timezone-strict instant parsing |
 | `mode.py` | Parse and validate the policy; theme lookup, freshness lookup, venue lookup |
 | `ticket.py` | The ticket contract, and the risk→notional arithmetic Codex needs |
+| `report.py` | The seat-report contract — how any researcher, including a fleet that is not this process, hands work to the desk |
 | `risk.py` | Rails. Per-ticket gates, then water-filling allocation under theme and heat caps |
 | `sources.py` | The data-source registry and the preflight prober |
 | `adapters/` | Per-seat fetchers returning `Evidence`: Polymarket (Odds), Hyperliquid (Chain), CBOE (Pulse), EDGAR (Shadow), FRED (Ledger) |
