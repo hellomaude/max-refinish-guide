@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parent.parent
 
 class PresenceTests(unittest.TestCase):
     def test_every_agent_entry_point_exists(self):
-        for name in ("AGENTS.md", "CLAUDE.md", "GOAL.md", "HANDOFF.md", "HANDOFF-NATIVE.md",
+        for name in ("AGENTS.md", "CLAUDE.md", "GOAL.md", "HANDOFF.md", "HANDOFF-NATIVE.md", "HANDOFF-LOCAL.md",
                      ".motif/STATE.md", "prompts/README.md"):
             self.assertTrue((ROOT / name).exists(), f"{name} missing")
 
@@ -121,3 +121,63 @@ class StateTests(unittest.TestCase):
     def test_state_does_not_claim_a_live_venue(self):
         text = (ROOT / ".motif" / "STATE.md").read_text()
         self.assertIn("live:false", text.replace(" ", ""))
+
+
+class LocalHandoffTests(unittest.TestCase):
+    def _text(self) -> str:
+        return (ROOT / "HANDOFF-LOCAL.md").read_text()
+
+    def test_it_is_for_the_mac_and_starts_with_the_launcher(self):
+        text = self._text()
+        self.assertIn("launch-mac.sh", text)
+        self.assertLess(text.index("L0"), text.index("L1"))
+
+    def test_it_never_asks_to_edit_policy_to_get_a_pass(self):
+        text = self._text()
+        self.assertIn("Never** edit the real `MODE.yaml`", text)
+        self.assertIn("temporary copy", text)
+
+    def test_it_keeps_the_swift_guard_rules(self):
+        text = self._text()
+        for needle in ('httpMethod = "POST"', "SecItem", "AgeLabel"):
+            self.assertIn(needle, text)
+
+
+class LauncherTests(unittest.TestCase):
+    """The one command that stands the desk up on a Mac."""
+
+    def _text(self) -> str:
+        return (ROOT / "install" / "launch-mac.sh").read_text()
+
+    def test_it_exists_and_is_executable(self):
+        import os
+
+        path = ROOT / "install" / "launch-mac.sh"
+        self.assertTrue(path.exists())
+        self.assertTrue(os.access(path, os.X_OK))
+
+    def test_it_runs_the_gate_before_anything_starts(self):
+        text = self._text()
+        self.assertLess(text.index("unittest discover"), text.index("install-macos.sh"))
+        self.assertIn("set -euo pipefail", text)
+
+    def test_it_never_touches_policy(self):
+        text = self._text()
+        self.assertNotIn("MODE.yaml", text.replace("never edits MODE.yaml", ""))
+        self.assertNotIn("live: true", text)
+        self.assertNotIn("sed -i", text)
+
+    def test_it_degrades_to_the_served_page_without_xcode(self):
+        text = self._text()
+        # Command Line Tools alone satisfy `xcode-select -p`; only xcodebuild
+        # proves the full Xcode is there.
+        self.assertIn("xcodebuild -version", text)
+        self.assertNotIn("xcode-select -p >/dev/null", text)
+        self.assertIn("served page is the UI until it is", text)
+
+    def test_it_passes_the_desk_root_through_open(self):
+        text = self._text()
+        self.assertIn('open "$APP" --env "DESK_ROOT=$ROOT"', text)
+        self.assertIn(".config/markets-desk/root", text)
+        mac = (ROOT / "apps" / "apple" / "Sources" / "DeskMac" / "DeskMacApp.swift").read_text()
+        self.assertIn(".config/markets-desk/root", mac)

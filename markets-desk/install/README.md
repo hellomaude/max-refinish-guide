@@ -2,6 +2,19 @@
 
 Everything runs on one always-on Mac. Nothing here is deployed anywhere else.
 
+## The one command
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/hellomaude/max-refinish-guide/main/markets-desk/install/launch-mac.sh | bash
+```
+
+Clones to `~/desk`, makes the venv, runs the test suite as the gate, writes
+`state/env` from the template, mints a pairing token, installs the two
+LaunchAgents, opens the served page, and — if Xcode is present — generates
+the project, runs `swift test`, builds DeskMac and launches it. Without
+Xcode it stops after the page, which is the UI until then. Re-run it after
+any `git pull`. The steps below are the same thing by hand.
+
 ## 1. Land it
 
 ```bash
