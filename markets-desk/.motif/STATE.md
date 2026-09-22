@@ -18,5 +18,9 @@ Decisions: No finance fine-tunes; general models plus contracts.
 Decisions: One allowlisted POST in adapters/base.py; PUT/PATCH/DELETE banned everywhere.
 Decisions: The ledger scores forward only; no backfilled outcomes.
 Open: Max — merge PR #1; name an equity venue or not; keep require_challenge true (recommended).
-Open: Box — preflight all 18 sources; wire EDGAR owner histories; re-verify WKND-002; Grok's first report; dashboard (Phase 4).
-Artifacts: plan=HANDOFF.md doctrine=codex-feed/DOCTRINE.md seats=docs/SEATS.md models=docs/MODELS.md open-weight=docs/OPEN-WEIGHT.md evidence=docs/EVIDENCE.md risk=docs/RISK-MODEL.md pr=hellomaude/max-refinish-guide#1
+Open: Box — preflight all 18 sources; wire EDGAR owner histories; re-verify WKND-002; Grok's first report.
+Open: Native — confirm contract (N0), desk serve (N1), daemon + push (N2), Mac app (N3), iPhone (N4), two weeks paper (N5). See HANDOFF-NATIVE.md.
+Decisions: The native app is the window, the gate and the alarm — never a router. A confirm is a file Codex must read before any sheet; it requires verdict pass, a matching stamp hash, and Max.
+Decisions: The iPhone holds no model, no key, no pack; desk serve has exactly one mutating route, /confirm.
+Decisions: The HTML dashboard is superseded by the Mac app; build it only as a no-Apple fallback.
+Artifacts: plan=HANDOFF.md native=HANDOFF-NATIVE.md doctrine=codex-feed/DOCTRINE.md seats=docs/SEATS.md models=docs/MODELS.md open-weight=docs/OPEN-WEIGHT.md evidence=docs/EVIDENCE.md risk=docs/RISK-MODEL.md pr=hellomaude/max-refinish-guide#1

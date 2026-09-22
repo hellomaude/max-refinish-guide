@@ -15,7 +15,8 @@ ROOT = Path(__file__).resolve().parent.parent
 
 class PresenceTests(unittest.TestCase):
     def test_every_agent_entry_point_exists(self):
-        for name in ("AGENTS.md", "CLAUDE.md", "HANDOFF.md", ".motif/STATE.md", "prompts/README.md"):
+        for name in ("AGENTS.md", "CLAUDE.md", "HANDOFF.md", "HANDOFF-NATIVE.md",
+                     ".motif/STATE.md", "prompts/README.md"):
             self.assertTrue((ROOT / name).exists(), f"{name} missing")
 
     def test_claude_points_at_agents(self):
@@ -57,6 +58,34 @@ class PromptTests(unittest.TestCase):
             lower = path.read_text().lower()
             for banned in ("place the order", "execute the trade", "submit_order", "create_order"):
                 self.assertNotIn(banned, lower, f"{path.name} contains {banned!r}")
+
+
+class NativeHandoffTests(unittest.TestCase):
+    """The native handoff must not quietly become an auto-trader spec."""
+
+    def _text(self) -> str:
+        return (ROOT / "HANDOFF-NATIVE.md").read_text()
+
+    def test_it_defines_the_agent_as_window_gate_alarm(self):
+        for needle in ("The window", "The gate", "The alarm"):
+            self.assertIn(needle, self._text())
+
+    def test_the_confirm_contract_requires_pass_hash_and_max(self):
+        text = self._text()
+        for needle in ("verdict: pass", "stamp_sha256", "confirmed_by: max", "expires_at"):
+            self.assertIn(needle, text)
+
+    def test_one_mutating_route(self):
+        self.assertIn("one mutating route", self._text())
+
+    def test_the_phone_holds_nothing_dangerous(self):
+        self.assertIn("never holds a model, a key, a broker credential, or the pack", self._text())
+
+    def test_it_never_promises_auto_trading(self):
+        lower = self._text().lower()
+        for banned in ("auto-execute", "executes automatically", "places the order for you",
+                       "no confirmation needed"):
+            self.assertNotIn(banned, lower)
 
 
 class StateTests(unittest.TestCase):

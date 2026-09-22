@@ -262,6 +262,12 @@ consistently does `pack` feed Codex directly.
 **Done when** two weeks of stamps agree, or every disagreement has been resolved
 into either a `MODE.yaml` correction or an engine fix with a test.
 
+### Phase 4 → superseded
+
+The HTML dashboard in Phase 4 is superseded by the native Mac app in
+`HANDOFF-NATIVE.md` §4 Phase N3, which reads the same loaders. Build the
+HTML version only as a no-Apple fallback. Do not build both.
+
 ### Phase 7 — The gate (Max's, not yours)
 
 When Max names a broker:
@@ -346,6 +352,14 @@ When you finish a phase, report: files changed; what changed for the desk
 count; what is unverified and why; open questions for Max. Update
 `.motif/STATE.md`. Smallest coherent patch.
 
+## 4e. After this: the native agent
+
+`HANDOFF-NATIVE.md` takes the desk from a box to Max's hand: a confirm
+contract (a file Codex must read before any sheet), `desk serve` with one
+write route, a daemon with push, a Mac app over the desk directory, and an
+iPhone client that can read and confirm and nothing else. Prerequisite is
+Phases 0–3 here. Start it only when they are done.
+
 ## 5. Things I know are wrong or thin
 
 - **The adapters are untested live.** Said three times because it matters.
@@ -388,6 +402,7 @@ your phase.
 ```
 markets-desk/
   HANDOFF.md                  ← this
+  HANDOFF-NATIVE.md           the Mac + iPhone agent; after Phases 0–3
   AGENTS.md CLAUDE.md         what every agent reads first
   .motif/STATE.md             compact state; update on every decision
   prompts/                    paste-ready prompts for web-chat seats
