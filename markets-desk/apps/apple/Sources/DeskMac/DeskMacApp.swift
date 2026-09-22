@@ -64,8 +64,13 @@ extension DeskStore {
     /// it from the desk root it pairs itself to loopback; otherwise Max
     /// pastes the URL like on the phone.
     func pairFromLoopbackIfPresent() {
+        // In order: the env `open --env` passes, the file the launcher writes
+        // (for Dock launches, which carry no env), then the default clone path.
+        let recorded = try? String(contentsOfFile: NSHomeDirectory() + "/.config/markets-desk/root", encoding: .utf8)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
         let candidates = [
             ProcessInfo.processInfo.environment["DESK_ROOT"],
+            recorded.flatMap { $0.isEmpty ? nil : $0 },
             NSHomeDirectory() + "/desk/markets-desk",
         ].compactMap { $0 }
         for root in candidates {

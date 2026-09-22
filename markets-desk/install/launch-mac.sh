@@ -61,8 +61,10 @@ open "http://127.0.0.1:8791/" || true
 
 # ---- 7. the native Mac app ---------------------------------------------------
 say "native Mac app"
-if ! xcode-select -p >/dev/null 2>&1; then
-  echo "Xcode not found; the served page is the UI until it is. Done."
+# `xcode-select -p` succeeds with Command Line Tools alone; only the full
+# Xcode has xcodebuild, so that is the test.
+if ! xcodebuild -version >/dev/null 2>&1; then
+  echo "Xcode not found (Command Line Tools alone is not enough); the served page is the UI until it is. Done."
   exit 0
 fi
 if ! command -v xcodegen >/dev/null; then
@@ -82,7 +84,10 @@ if xcodebuild -project Desk.xcodeproj -scheme DeskMac -configuration Debug \
   APP="$(find "$BUILD_DIR/Build/Products/Debug" -maxdepth 1 -name 'DeskMac.app' | head -1)"
   [ -n "$APP" ] || die "built, but DeskMac.app not found under $BUILD_DIR"
   say "launching $APP"
-  DESK_ROOT="$ROOT" open "$APP"
+  # Launch Services does not forward a shell prefix's environment; `open --env`
+  # does. The file is the fallback for launches from the Dock.
+  mkdir -p "$HOME/.config/markets-desk" && printf '%s\n' "$ROOT" > "$HOME/.config/markets-desk/root"
+  open "$APP" --env "DESK_ROOT=$ROOT"
   echo
   echo "Mac app is up. It pairs itself to loopback from state/pair.token."
   echo "For the phone: .venv/bin/python -m desk pair --host <tailnet-ip> --qr, then open Desk.xcodeproj → DeskPhone → run on device."

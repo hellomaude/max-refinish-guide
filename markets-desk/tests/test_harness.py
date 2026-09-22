@@ -169,5 +169,15 @@ class LauncherTests(unittest.TestCase):
 
     def test_it_degrades_to_the_served_page_without_xcode(self):
         text = self._text()
-        self.assertIn("xcode-select -p", text)
+        # Command Line Tools alone satisfy `xcode-select -p`; only xcodebuild
+        # proves the full Xcode is there.
+        self.assertIn("xcodebuild -version", text)
+        self.assertNotIn("xcode-select -p >/dev/null", text)
         self.assertIn("served page is the UI until it is", text)
+
+    def test_it_passes_the_desk_root_through_open(self):
+        text = self._text()
+        self.assertIn('open "$APP" --env "DESK_ROOT=$ROOT"', text)
+        self.assertIn(".config/markets-desk/root", text)
+        mac = (ROOT / "apps" / "apple" / "Sources" / "DeskMac" / "DeskMacApp.swift").read_text()
+        self.assertIn(".config/markets-desk/root", mac)
