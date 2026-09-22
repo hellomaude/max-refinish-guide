@@ -123,6 +123,28 @@ per order.
 
 ---
 
+## 3b. What is built, as of 2026-09-22
+
+The package side of this handoff exists and is under test:
+
+| Piece | State |
+|---|---|
+| `desk/confirm.py`, `confirmations/`, `desk confirm` | **Built.** Refuses PENDING/FAIL, non-Max, stale digest, expiry, >24h |
+| `desk/sheet.py`, `desk sheet` | **Built.** `format_sheet` requires a `Confirm`; boundary test pins the signature |
+| `desk serve` | **Built.** Page + JSON API; exactly one mutating route; token-gated; loopback default |
+| The page (`desk/ui.py`) | **Built.** Served HTML, works in Safari on Mac and iPhone; hold-to-confirm; every timestamp shows age |
+| `desk daemon`, `CADENCE.yaml` | **Built.** Runs slots, writes preflight/assign/stamp/pack, pushes on the conditions in N2 |
+| `desk/notify.py` | **Built.** ntfy or Pushover, deduplicated per condition per cooldown |
+| `desk pair`, `install/` | **Built.** Token minting, LaunchAgents for serve and daemon, env template |
+| `codex-feed/connectors.json` | **Built.** `validate` asserts seat dependencies |
+| Native Mac app (N3) | **Not built.** The served page is the Mac UI until then |
+| Native iPhone app (N4) | **Not built.** The served page in Safari is the iPhone UI until then; pairing works as specified |
+
+The served page *is* the window, the gate and the alarm today. The native
+apps are an upgrade over the same `serve` API, not a prerequisite for
+anything below. N0–N2 are done in the package; N3/N4 become "build native
+over `/api/*` and `/confirm`" rather than "design it".
+
 ## 4. The plan, in order
 
 Prerequisites: `HANDOFF.md` Phases 0–3 done (landed, data layer proven live,

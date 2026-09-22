@@ -168,8 +168,11 @@ Every PR body, and the final report:
 
 ## 8. Where you are right now
 
-`main` carries the desk at 268 tests, merged 2026-09-22. No adapter has
-touched a live endpoint. No local model is served. No confirm contract
-exists. No app exists. `.motif/STATE.md` has the decisions to date.
+`main` carries the desk, merged 2026-09-22, plus the system layer: the
+confirm contract, the sheet path, `desk serve` with the page, the daemon
+with push, pairing, the install kit, and the connector manifest — all under
+test, none run on the box. No adapter has touched a live endpoint. No local
+model is served. No native app exists; the served page is the UI on both
+devices. `.motif/STATE.md` has the decisions to date.
 
 The first task is `HANDOFF.md` Phase 0. Go.

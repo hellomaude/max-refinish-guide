@@ -1,6 +1,6 @@
 """`python -m desk` — the desk's command line.
 
-Nine verbs, each one a thing a seat or Codex actually does:
+Fourteen verbs, each one a thing a seat, Codex, or Max actually does:
     validate   refuse a malformed book before it reaches Codex
     preflight  probe the data layer and say what is reachable
     fetch      pull a seat's evidence, ready to paste into a ticket
@@ -10,6 +10,11 @@ Nine verbs, each one a thing a seat or Codex actually does:
     pack       render the Codex pack for a session
     score      report how the desk's past ideas actually did
     coach      grade a research seat's calls and say what to change
+    confirm    Max's yes on one ticket for one session, as a file
+    sheet      format a paper or order sheet from a confirm — and only from one
+    serve      the desk over HTTP: the page, the API, and the one write
+    daemon     run the cadence; write every session; push what needs Max
+    pair       mint the token a phone needs to confirm
 """
 
 from __future__ import annotations
@@ -23,6 +28,10 @@ from pathlib import Path
 from .assign import audit, build_assignment, load_assignments, render_assignment
 from .challenge import load_challenges, unchallenged
 from .coach import coach, coverage_history, grade_crowding, grade_report, level_counts
+from .confirm import load_confirms, make_confirm, usable, write_confirm
+from .connectors import latest_health, load_manifest
+from .daemon import Paths, load_cadence, run_forever, run_slot
+from .sheet import format_sheet, write_sheet
 from .report import load_report_history, load_reports, seats_reporting
 from .roster import check_filings, load_roster
 from .ledger import (
@@ -47,6 +56,10 @@ DEFAULT_CHALLENGES = ROOT / "challenges"
 DEFAULT_REPORTS = ROOT / "reports"
 DEFAULT_ASSIGNMENTS = ROOT / "assignments"
 DEFAULT_ROSTER = ROOT / "codex-feed" / "ROSTER.yaml"
+DEFAULT_CONNECTORS = ROOT / "codex-feed" / "connectors.json"
+DEFAULT_CONFIRMATIONS = ROOT / "confirmations"
+DEFAULT_SHEETS = ROOT / "sheets"
+DEFAULT_PREFLIGHT = ROOT / "preflight"
 
 
 def _now(value: str | None) -> datetime:
@@ -103,6 +116,7 @@ def cmd_validate(args: argparse.Namespace) -> int:
         print(f"sources   ok   {len(sources)} registered")
     except (DeskError, OSError) as exc:
         problems.append(f"sources: {exc}")
+        sources = []
 
     try:
         challenges = load_challenges(args.challenges)
@@ -137,6 +151,19 @@ def cmd_validate(args: argparse.Namespace) -> int:
     except (DeskError, OSError) as exc:
         problems.append(f"reports: {exc}")
         reports = {}
+
+    if Path(args.connectors).exists() and sources:
+        try:
+            manifest = load_manifest(args.connectors)
+            problems.extend(manifest.check_registry(s.id for s in sources))
+            health = latest_health(args.preflight)
+            dark = manifest.dark_seats(health) if health else []
+            print(f"connectors ok  {len(manifest.seats)} seats declared"
+                  + (f"; {len(dark)} with a dark dependency" if dark else ""))
+            for line in dark:
+                print(f"DARK      {line}", file=sys.stderr)
+        except (DeskError, OSError, ValueError) as exc:
+            problems.append(f"connectors: {exc}")
 
     if mode is not None:
         missing = [s for s in mode.required_seats if s not in seats_reporting(reports)]
@@ -328,13 +355,9 @@ def cmd_stamp(args: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_pack(args: argparse.Namespace) -> int:
-    mode = load_mode(args.mode)
-    tickets = load_tickets(args.tickets)
-    now = _now(args.now)
-    challenges = _counted_challenges(args, tickets)
-    reports = load_reports(args.reports)
-    book = stamp_book(tickets, mode, now=now, open_risk=_open_risk(args.open_risk),
+def render_pack(mode, tickets, reports, challenges, *, now: datetime, open_risk=None) -> str:
+    """The Codex pack as text. Shared by `pack` and the daemon."""
+    book = stamp_book(tickets, mode, now=now, open_risk=open_risk or OpenRisk(),
                       challenges=challenges,
                       available_seats=seats_reporting(reports) or None)
     by_id = {t.id: t for t in tickets}
@@ -393,7 +416,16 @@ def cmd_pack(args: argparse.Namespace) -> int:
                     f"| {item.key} | {item.value} | {item.source} | {item.as_of:%Y-%m-%d %H:%MZ} |"
                 )
             out.append("")
-    text = "\n".join(out)
+    return "\n".join(out)
+
+
+def cmd_pack(args: argparse.Namespace) -> int:
+    mode = load_mode(args.mode)
+    tickets = load_tickets(args.tickets)
+    now = _now(args.now)
+    text = render_pack(mode, tickets, load_reports(args.reports),
+                       _counted_challenges(args, tickets), now=now,
+                       open_risk=_open_risk(args.open_risk))
     if args.out:
         path = Path(args.out)
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -529,6 +561,107 @@ def cmd_score(args: argparse.Namespace) -> int:
     return 0
 
 
+def _current_book(args: argparse.Namespace, now: datetime):
+    mode = load_mode(args.mode)
+    tickets = load_tickets(args.tickets)
+    reports = load_reports(args.reports)
+    book = stamp_book(tickets, mode, now=now, challenges=_counted_challenges(args, tickets),
+                      available_seats=seats_reporting(reports) or None)
+    return mode, tickets, book
+
+
+def cmd_confirm(args: argparse.Namespace) -> int:
+    now = _now(args.now)
+    mode, tickets, book = _current_book(args, now)
+    if args.list:
+        confirms = load_confirms(args.confirmations)
+        if not confirms:
+            print("no confirms on file")
+            return 0
+        good, bad = usable(confirms, book, now=now)
+        for tid, c in sorted(confirms.items()):
+            state = "usable" if tid in good else "void"
+            print(f"{tid:<12} {state:<7} {c.allowed_pct:.2f}%  from {c.device}  "
+                  f"expires {c.expires_at:%Y-%m-%d %H:%MZ}")
+        for line in bad:
+            print(f"  {line}")
+        return 0
+    ticket = next((t for t in tickets if t.id == args.ticket), None)
+    stamp = book.by_id(args.ticket)
+    if ticket is None or stamp is None:
+        print(f"{args.ticket}: not in the book", file=sys.stderr)
+        return 2
+    confirm = make_confirm(ticket, stamp, book, now=now, device=args.device, note=args.note or "")
+    path = write_confirm(confirm, args.confirmations)
+    print(f"confirmed {ticket.id} at {confirm.allowed_pct:.2f}% from {args.device}; "
+          f"good until {confirm.expires_at:%Y-%m-%d %H:%MZ}")
+    print(f"wrote {path}")
+    return 0
+
+
+def cmd_sheet(args: argparse.Namespace) -> int:
+    now = _now(args.now)
+    mode, tickets, book = _current_book(args, now)
+    confirms = load_confirms(args.confirmations)
+    held = confirms.get(args.ticket)
+    if held is None:
+        print(f"{args.ticket}: no confirm on file — a sheet needs Max's yes first", file=sys.stderr)
+        return 2
+    ticket = next((t for t in tickets if t.id == args.ticket), None)
+    stamp = book.by_id(args.ticket)
+    if ticket is None or stamp is None:
+        print(f"{args.ticket}: not in the book", file=sys.stderr)
+        return 2
+    sheet = format_sheet(ticket, stamp, book, mode, held, now=now,
+                         risk_budget_usd=args.risk_budget)
+    text = sheet.render()
+    if args.out:
+        path = write_sheet(sheet, args.out)
+        print(f"wrote {path}")
+    else:
+        print(text)
+    return 0
+
+
+def cmd_serve(args: argparse.Namespace) -> int:
+    from .serve import load_token, make_server, serve_forever
+
+    root = Path(args.root)
+    token = load_token(root)
+    server = make_server(root, bind=args.bind, port=args.port, token=token)
+    where = f"http://{args.bind}:{args.port}"
+    print(f"desk serve on {where} — {'paired' if token else 'no pairing token; run `desk pair` before binding off loopback'}")
+    serve_forever(server)
+    return 0
+
+
+def cmd_daemon(args: argparse.Namespace) -> int:
+    paths = Paths(Path(args.root))
+    if args.once:
+        cadence = load_cadence(paths.cadence)
+        slot = cadence.slot(args.once)
+        result = run_slot(slot, paths, cadence, now=_now(args.now), dry_run_push=args.dry_run_push)
+        for step, outcome in result.steps:
+            print(f"{step:<10} {outcome}")
+        for push, outcome in result.pushes:
+            print(f"push       [{push.key}] {outcome}")
+        return 0 if result.ok else 1
+    print(f"desk daemon running {paths.cadence.name}; log at {paths.log}")
+    run_forever(paths, dry_run_push=args.dry_run_push)
+    return 0
+
+
+def cmd_pair(args: argparse.Namespace) -> int:
+    from .serve import new_token
+
+    root = Path(args.root)
+    token = new_token(root)
+    host = args.host or "127.0.0.1"
+    print("pairing token written to state/pair.token (old token is now invalid)")
+    print(f"open this once on the phone, then never share it:\n  http://{host}:{args.port}/?token={token}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="desk", description=__doc__.splitlines()[0])
     sub = parser.add_subparsers(dest="command", required=True)
@@ -543,6 +676,8 @@ def build_parser() -> argparse.ArgumentParser:
     p_validate = sub.add_parser("validate", help="structurally check mode, tickets and sources")
     common(p_validate)
     p_validate.add_argument("--sources", default=str(DEFAULT_SOURCES))
+    p_validate.add_argument("--connectors", default=str(DEFAULT_CONNECTORS))
+    p_validate.add_argument("--preflight", default=str(DEFAULT_PREFLIGHT))
     p_validate.set_defaults(func=cmd_validate)
 
     p_challenge = sub.add_parser("challenge", help="list tickets Jev has not argued against")
@@ -617,6 +752,44 @@ def build_parser() -> argparse.ArgumentParser:
     p_coach.add_argument("--assignments", default=str(DEFAULT_ASSIGNMENTS))
     p_coach.add_argument("--now")
     p_coach.set_defaults(func=cmd_coach)
+
+    p_confirm = sub.add_parser("confirm", help="Max's yes on one ticket, for one session")
+    common(p_confirm)
+    p_confirm.add_argument("ticket", nargs="?", help="ticket id to confirm")
+    p_confirm.add_argument("--device", default="cli", choices=("cli", "mac", "iphone"))
+    p_confirm.add_argument("--note")
+    p_confirm.add_argument("--now")
+    p_confirm.add_argument("--confirmations", default=str(DEFAULT_CONFIRMATIONS))
+    p_confirm.add_argument("--list", action="store_true", help="show confirms on file and whether each is usable")
+    p_confirm.set_defaults(func=cmd_confirm)
+
+    p_sheet = sub.add_parser("sheet", help="format a sheet from a confirm, and only from one")
+    common(p_sheet)
+    p_sheet.add_argument("ticket")
+    p_sheet.add_argument("--now")
+    p_sheet.add_argument("--confirmations", default=str(DEFAULT_CONFIRMATIONS))
+    p_sheet.add_argument("--risk-budget", type=float, help="USD at risk across the whole book")
+    p_sheet.add_argument("--out", help="directory to write the sheet into (default: print)")
+    p_sheet.set_defaults(func=cmd_sheet)
+
+    p_serve = sub.add_parser("serve", help="the desk over HTTP: page, API, one write")
+    p_serve.add_argument("--root", default=str(ROOT))
+    p_serve.add_argument("--bind", default="127.0.0.1")
+    p_serve.add_argument("--port", type=int, default=8791)
+    p_serve.set_defaults(func=cmd_serve)
+
+    p_daemon = sub.add_parser("daemon", help="run the cadence and push what needs Max")
+    p_daemon.add_argument("--root", default=str(ROOT))
+    p_daemon.add_argument("--once", metavar="SLOT", help="run one slot now and exit")
+    p_daemon.add_argument("--now", help="ISO-8601 instant for --once (default: now)")
+    p_daemon.add_argument("--dry-run-push", action="store_true", help="log pushes without sending")
+    p_daemon.set_defaults(func=cmd_daemon)
+
+    p_pair = sub.add_parser("pair", help="mint the token a phone needs to confirm")
+    p_pair.add_argument("--root", default=str(ROOT))
+    p_pair.add_argument("--host", help="address the phone will use (tailnet or LAN)")
+    p_pair.add_argument("--port", type=int, default=8791)
+    p_pair.set_defaults(func=cmd_pair)
 
     return parser
 

@@ -44,6 +44,9 @@ and then only as far as Max says.
 - `desk/risk.py` — the engine. Gate order is documented in `_ceiling_for`.
 - `desk/ticket.py`, `challenge.py`, `report.py`, `assign.py` — the four
   contracts. They refuse on load; read the refusal before working around it.
+- `desk/confirm.py`, `desk/sheet.py` — the gate as code. A sheet needs a confirm.
+- `desk/serve.py`, `desk/ui.py` — the page and the API; one write, `/confirm`.
+- `desk/daemon.py`, `codex-feed/CADENCE.yaml` — the clock. Never fetches for a seat, never confirms.
 - `tests/test_boundary.py` — the guard.
 - `docs/SEATS.md` — every seat's contract and what gets its output refused.
 - `prompts/` — paste-ready prompts for running a seat in a web chat.

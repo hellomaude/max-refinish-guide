@@ -1,0 +1,17 @@
+{
+  "_comment": "Per-seat dependencies. `desk validate` asserts every `sources` id exists in sources.yaml and, when a preflight report is on file, that none it depends on is unreachable. `mcp` entries are documentation for the box: which connectors to attach in the client that hosts the seat. Nothing here is a credential.",
+  "schema_version": 1,
+  "seats": {
+    "Wire":   { "mcp": ["web-search"],  "sources": [] },
+    "Ledger": { "mcp": ["zacks-data"],  "sources": ["fred", "sec_companyfacts", "treasury_yield_curve"] },
+    "Chain":  { "mcp": [],              "sources": ["hyperliquid_info", "coinglass", "coinalyze"] },
+    "Odds":   { "mcp": [],              "sources": ["polymarket_gamma", "polymarket_clob"] },
+    "Pulse":  { "mcp": [],              "sources": ["cboe_delayed_chain", "alpha_vantage_options"] },
+    "Shadow": { "mcp": [],              "sources": ["sec_submissions", "sec_fulltext"] },
+    "Grok":   { "mcp": [],              "sources": [] },
+    "Rails":  { "mcp": [],              "sources": [] },
+    "CoS":    { "mcp": [],              "sources": [] },
+    "Jev":    { "mcp": [],              "sources": [] },
+    "Codex":  { "mcp": [],              "sources": [] }
+  }
+}

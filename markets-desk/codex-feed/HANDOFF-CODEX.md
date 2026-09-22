@@ -49,6 +49,19 @@ sheet to write. Do not round up, do not average two tickets, do not treat a
 
 ---
 
+## 2b. The confirm — read before §3
+
+You format a sheet only for a ticket with a confirm on file. Not a message,
+not a chat reply: a file in `confirmations/`, written by `desk confirm` or by
+the page's confirm button, that carries a digest of the stamp Max was looking
+at. `python -m desk sheet <TICKET>` is the only path to a sheet and it refuses
+without one, or with one whose digest no longer matches the book, or one that
+has expired. `desk confirm --list` shows what is usable right now.
+
+If the book moves after Max confirms — a seat files, Jev revises, a window
+opens — the digest changes and the confirm is void. The daemon pushes him.
+You do not proceed on the old one.
+
 ## 3. Converting a ceiling into a position
 
 Percentages are of the **risk budget** — capital at risk if the invalidation

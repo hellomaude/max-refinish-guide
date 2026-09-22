@@ -36,11 +36,18 @@ in the same factor.
 | `assign.py` | The desk's work order to a research seat, and the audit of what came back |
 | `coach.py` | Grade a seat's crowding calls against the ledger; emit what to change |
 | `roster.py` | Which model sits where; the adversary-must-differ rule; score by model |
+| `confirm.py` | Max's yes as a file: PASS only, digest of the stamp, one session, `max` only; void when the book moves |
+| `sheet.py` | The order/paper sheet; `format_sheet` takes a `Confirm` and there is no version that does not |
+| `serve.py` | The desk over HTTP: every GET a view over the loaders; exactly one write, `/confirm`, token-gated |
+| `ui.py` | The page, rendered server-side from the snapshot; every timestamp shows its age; one fetch, to `/confirm` |
+| `daemon.py` | The cadence from `CADENCE.yaml`; writes every session; never fetches for a seat, never confirms |
+| `notify.py` | Push via ntfy or Pushover, deduplicated per condition; may only reach notify hosts |
+| `connectors.py` | Per-seat dependency manifest; `validate` refuses unknown sources and names dark seats |
 | `risk.py` | Rails. Per-ticket gates, then water-filling allocation under theme and heat caps |
 | `sources.py` | The data-source registry and the preflight prober |
 | `adapters/` | Per-seat fetchers returning `Evidence`: Polymarket (Odds), Hyperliquid (Chain), CBOE (Pulse), EDGAR (Shadow), FRED (Ledger) |
 | `ledger.py` | Outcome scoring and the calibration check |
-| `cli.py` | `validate`, `preflight`, `fetch`, `assign`, `challenge`, `stamp`, `pack`, `score`, `coach` |
+| `cli.py` | `validate`, `preflight`, `fetch`, `assign`, `challenge`, `stamp`, `pack`, `score`, `coach`, `confirm`, `sheet`, `serve`, `daemon`, `pair` |
 
 Stdlib only, plus PyYAML. Every dependency is something that can break at 06:30
 on a Monday, and the desk runs on one box with no one to page.
