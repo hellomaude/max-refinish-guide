@@ -10,6 +10,13 @@ longer parse prose to find out how much you may work with.
 
 ---
 
+## 0. Read first, now that it exists
+
+`markets-desk/AGENTS.md` is your native instruction file — hard rules, hot
+files, acceptance, reporting. `prompts/CODEX_IMPLEMENTATION_PROMPT.md` is the
+paste-in for desk code work; branch as `codex/desk-<topic>`. `.motif/STATE.md`
+is the current state. This file is what changed for you on the desk itself.
+
 ## 1. The one-line version
 
 The desk's caps, freshness rules and correlation buckets moved out of markdown

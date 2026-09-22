@@ -43,6 +43,7 @@ class ModelSpec:
     strengths: str
     hosting: str = "api"
     license: str = ""
+    web: bool = False
 
     @property
     def is_local(self) -> bool:
@@ -83,6 +84,10 @@ class Roster:
 
     def local_models(self) -> tuple[str, ...]:
         return tuple(m for m, spec in self.models.items() if spec.is_local)
+
+    def web_models(self) -> tuple[str, ...]:
+        """Models a chat window can stand in for. A local model is never one."""
+        return tuple(m for m, spec in self.models.items() if spec.web and not spec.is_local)
 
     def adversary_pool(self) -> tuple[str, ...]:
         jev = self.seats.get("Jev")
@@ -189,6 +194,11 @@ class Roster:
                     "roster: Jev's pool has no local model — every frontier-authored "
                     "ticket would have to leave the box to be challenged"
                 )
+        for model, spec in self.models.items():
+            if spec.web and spec.is_local:
+                out.append(
+                    f"roster: {model} is both local and web — a chat window is not on the box"
+                )
         for seat, assignment in self.seats.items():
             for member in assignment.pool:
                 if member not in self.models:
@@ -231,6 +241,7 @@ def parse_roster(doc: Mapping[str, Any], *, where: str = "roster") -> Roster:
             strengths=str(spec.get("strengths", "")).strip(),
             hosting=hosting,
             license=str(spec.get("license", "")),
+            web=bool(spec.get("web", False)),
         )
 
     seats: dict[str, SeatAssignment] = {}

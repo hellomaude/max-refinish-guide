@@ -244,3 +244,21 @@ class OpenWeightTests(unittest.TestCase):
         roster = load_roster(ROOT / "codex-feed" / "ROSTER.yaml")
         pool = set(roster.adversary_pool())
         self.assertTrue(pool - {"qwen3.6-27b"})
+
+
+class WebSeatTests(unittest.TestCase):
+    """A chat window is a seat. It is never on the box."""
+
+    def test_the_frontier_models_may_run_as_web_sessions(self):
+        roster = load_roster(ROOT / "codex-feed" / "ROSTER.yaml")
+        self.assertEqual(set(roster.web_models()), {"claude", "codex", "grok", "gemini"})
+
+    def test_a_local_model_cannot_be_web(self):
+        with self.assertRaises(ValidationError) as caught:
+            parse_roster({
+                "schema_version": 1,
+                "updated_at": "2026-09-22T08:00:00-07:00",
+                "models": {"q": {"vendor": "v", "hosting": "local", "web": True, "strengths": "s"}},
+                "seats": {"Jev": {"model": "any", "pool": ["q"], "why": "x"}},
+            }, where="test-roster")
+        self.assertIn("both local and web", str(caught.exception))

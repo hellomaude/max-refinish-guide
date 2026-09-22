@@ -10,6 +10,9 @@
 # `hosting` says whether the book leaves the box when that model reads it.
 # `local` models run on the desk machine; nothing they see is sent anywhere.
 # `api` models are called over the network, open-weight or not.
+# `web: true` means a chat-window session of that model is an acceptable way
+# to hold the seat — paste `prompts/*.md`, paste the output into the file. For
+# privacy it is the same as `api`: what you paste leaves the box.
 #
 # Model ids are families, not versions. Pin versions on the box, not here.
 
@@ -19,21 +22,25 @@ updated_at: 2026-09-22T08:00:00-07:00
 models:
   # ---- frontier, hosted ----
   claude:
+    web: true
     vendor: Anthropic
     hosting: api
     license: proprietary
     strengths: long-context synthesis; careful with contracts and refusals; wrote the plumbing and its tests
   codex:
+    web: true
     vendor: OpenAI
     hosting: api
     license: proprietary
     strengths: execution path; order-sheet formatting; owns the ticket -> sheet contract
   grok:
+    web: true
     vendor: xAI
     hosting: api
     license: proprietary
     strengths: the only model with live X access; real-time attention
   gemini:
+    web: true
     vendor: Google
     hosting: api
     license: proprietary

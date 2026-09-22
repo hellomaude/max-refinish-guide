@@ -279,6 +279,73 @@ You may prepare steps 2–3 so they are ready. You may not perform step 1.
 
 ---
 
+## 4b. How Max runs agents — the harness
+
+This is the layout Max's agents expect, and this package now matches it:
+
+- **`AGENTS.md`** at the package root is what Codex reads natively. `CLAUDE.md`
+  points at it. Both carry the hard rules, hot files, acceptance and the
+  reporting format. Do not put instructions anywhere an agent will not look.
+- **`.motif/STATE.md`** is the compact state: Idea / Track / Stage /
+  Decisions / Open / Artifacts. Update it when a decision lands; it is what
+  the next session reads before this file.
+- **`prompts/*.md`** are paste-ready. A seat is anything that writes a file
+  the contract accepts, so a **web chat window is a seat**: paste the prompt,
+  paste the input at `<PASTE … HERE>`, paste the output into the named file,
+  run `desk validate`. This is how the desk runs on day one with no API keys.
+  `prompts/README.md` maps prompt → seat → output path.
+- **Branches:** `codex/desk-<topic>`, `claude/<topic>`, `cursor/<topic>`.
+  One topic per branch, PR to `main`, Max merges. Never mark ready without him.
+- **Local models are loopback-only.** The endpoint for Qwen and gpt-oss is
+  `127.0.0.1`, no redirects, no fallback to a hosted vendor if the local model
+  is down — a dark local seat files `no_read`, it does not quietly leave the
+  box.
+- **The deterministic gate** is the test suite plus `desk validate` plus
+  `desk stamp`. Keep the count in the handoff current so a regression is
+  visible as a number.
+
+## 4c. Traps that already cost time
+
+Each of these was a real failure in this build. Read them before writing code.
+
+1. **A naive timestamp is how a desk convinces itself stale data is fresh.**
+   The loader refuses any `as_of`, `produced_at` or `challenged_at` without
+   an offset. Do not add a default timezone to be helpful.
+2. **`as_of` is when the fact was true, not when it was fetched.** The CBOE
+   adapter refuses a chain with no timestamp rather than stamping the wall
+   clock; that substitution is exactly what produced a gamma profile frozen
+   at the prior Friday's expiry.
+3. **"No POST" was the wrong invariant.** Hyperliquid's read endpoint takes a
+   body. The rule is "no mutating request": POST confined to
+   `adapters/base.py` with pinned read-only payloads; PUT/PATCH/DELETE banned.
+   Do not evade the guard; change the rule and the test together.
+4. **Priority by declared size sorted the live book to zero.** Four of five
+   tickets declare `size_hint_pct: 0.0` ("Rails, you size it"). Discounting
+   by the conviction ladder instead was circular — confidence is the number
+   the research informs. Priority is the theme ceiling, capped by any hint.
+5. **Summing per-name figures double-counts a shared theme cap.** Three legs
+   under one 1.5% cap are 1.5% at stake, not 4.5%. Anywhere you total risk,
+   count each theme ceiling once.
+6. **A test fixture can be stale at the test clock.** A Monday price item was
+   31 h old at a Tuesday test `now`, so the staleness gate fired before the
+   gate under test. Build fixtures relative to the clock you stamp with.
+7. **An unpublishable condition looks rigorous.** Jev asked for a base rate
+   nobody publishes; the honest move was to withdraw it, not guess. Never
+   fabricate a number to satisfy a mind-change condition.
+8. **Paper hosts are egress-blocked here** (arXiv, SSRN, NBER, Springer,
+   ScienceDirect, Substack, Reddit). `docs/EVIDENCE.md` is built from search
+   summaries and says so. Open the four load-bearing papers on the box.
+9. **The Senate tally was wrong twice before it was right.** 49–50, Roll Call
+   234. Two secondary sources disagreed on direction; the primary record
+   settled it. Prefer the primary source, and say when you have not read it.
+
+## 4d. Reporting
+
+When you finish a phase, report: files changed; what changed for the desk
+(which seat, which gate, which number); verification performed with the test
+count; what is unverified and why; open questions for Max. Update
+`.motif/STATE.md`. Smallest coherent patch.
+
 ## 5. Things I know are wrong or thin
 
 - **The adapters are untested live.** Said three times because it matters.
@@ -321,6 +388,9 @@ your phase.
 ```
 markets-desk/
   HANDOFF.md                  ← this
+  AGENTS.md CLAUDE.md         what every agent reads first
+  .motif/STATE.md             compact state; update on every decision
+  prompts/                    paste-ready prompts for web-chat seats
   README.md                   the verbs
   codex-feed/
     MODE.yaml                 the authority
@@ -342,7 +412,7 @@ markets-desk/
 
 ## 8. Your first hour
 
-1. Read `codex-feed/DOCTRINE.md`, then §2 above again.
+1. Read `AGENTS.md`, `.motif/STATE.md`, `codex-feed/DOCTRINE.md`, then §2 above again.
 2. `python -m unittest discover -s tests -t . -q` — 229, OK, or stop.
 3. `python -m desk stamp` — read every reason line. If any surprises you, read
    `docs/RISK-MODEL.md` before touching anything.
