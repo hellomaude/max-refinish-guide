@@ -1,13 +1,15 @@
 """`python -m desk` — the desk's command line.
 
-Seven verbs, each one a thing a seat or Codex actually does:
+Nine verbs, each one a thing a seat or Codex actually does:
     validate   refuse a malformed book before it reaches Codex
     preflight  probe the data layer and say what is reachable
     fetch      pull a seat's evidence, ready to paste into a ticket
+    assign     issue a research seat its work order, and audit what came back
     challenge  list what Jev has not argued against yet
     stamp      run Rails over the book and print allowances
     pack       render the Codex pack for a session
     score      report how the desk's past ideas actually did
+    coach      grade a research seat's calls and say what to change
 """
 
 from __future__ import annotations
@@ -18,8 +20,10 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+from .assign import audit, build_assignment, load_assignments, render_assignment
 from .challenge import load_challenges, unchallenged
-from .report import load_reports, seats_reporting
+from .coach import coach, coverage_history, grade_crowding, grade_report, level_counts
+from .report import load_report_history, load_reports, seats_reporting
 from .ledger import (
     calibration_report,
     challenge_report,
@@ -40,6 +44,7 @@ DEFAULT_SOURCES = ROOT / "codex-feed" / "sources.yaml"
 DEFAULT_OUTCOMES = ROOT / "ledger"
 DEFAULT_CHALLENGES = ROOT / "challenges"
 DEFAULT_REPORTS = ROOT / "reports"
+DEFAULT_ASSIGNMENTS = ROOT / "assignments"
 
 
 def _now(value: str | None) -> datetime:
@@ -363,6 +368,96 @@ def cmd_pack(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_assign(args: argparse.Namespace) -> int:
+    mode = load_mode(args.mode)
+    tickets = load_tickets(args.tickets) if Path(args.tickets).exists() else []
+    now = _now(args.now)
+    reports = load_reports(args.reports) if Path(args.reports).exists() else {}
+
+    if args.audit:
+        existing = load_assignments(args.assignments)
+        held = existing.get(args.seat)
+        if held is None:
+            print(f"no assignment on file for {args.seat} under {args.assignments}")
+            return 1
+        coverage = audit(held, reports.get(args.seat), now=now)
+        print(f"assignment issued {held.issued_at:%Y-%m-%d %H:%MZ}, up to "
+              f"{held.at_stake_pct:.2f}% of book risk waiting on it")
+        for line in coverage.lines():
+            print(line)
+        return 0 if coverage.complete or not args.strict else 1
+
+    assignment = build_assignment(
+        args.seat,
+        tickets,
+        mode,
+        now=now,
+        prior=reports.get(args.seat),
+        note=args.note or "",
+    )
+    if not assignment.tasks:
+        print(
+            f"nothing to assign {args.seat}: every name in the book already carries a "
+            "call inside the freshness budget"
+        )
+        return 0
+
+    print(f"# {args.seat} — {len(assignment.tasks)} task(s), up to "
+          f"{assignment.at_stake_pct:.2f}% of book risk waiting on the answers")
+    for task in assignment.tasks:
+        print(task.line())
+
+    if args.out:
+        out = Path(args.out)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(render_assignment(assignment), encoding="utf-8")
+        print(f"\nwrote {out}")
+    return 0
+
+
+def cmd_coach(args: argparse.Namespace) -> int:
+    tickets = load_tickets(args.tickets) if Path(args.tickets).exists() else []
+    outcomes = load_outcomes(args.outcomes, tickets) if Path(args.outcomes).exists() else []
+    history = load_report_history(args.reports) if Path(args.reports).exists() else []
+    now = _now(args.now)
+
+    mine = [r for r in history if r.seat.strip().lower() == args.seat.strip().lower()]
+    if not mine:
+        print(f"no reports from {args.seat} under {args.reports}; nothing to grade yet")
+        return 0
+
+    counts = level_counts(history, seat=args.seat)
+    total = sum(counts.values())
+    print(f"## {args.seat}: {len(mine)} report(s), {total} crowding call(s)")
+    for level, count in counts.items():
+        share = f"{count / total:.0%}" if total else "  - "
+        print(f"  {level:<16} {count:>4}  {share:>5}")
+    if total and counts["crowded"] == 0:
+        print(
+            "  note: `crowded` never used — a level that never fires is not caution, "
+            "it is an unused field"
+        )
+
+    grade = grade_crowding(outcomes, history, tickets, seat=args.seat)
+    print()
+    for line in grade_report(grade):
+        print(line)
+
+    coverage = coverage_history(
+        load_assignments(args.assignments), history, now=now, seat=args.seat
+    )
+    if coverage:
+        print()
+        for entry in coverage:
+            for line in entry.lines():
+                print(line)
+
+    print(f"\n## what to change")
+    for line in coach(grade, coverage, seat=args.seat):
+        print(f"- {line}")
+    return 0
+
+
 def cmd_score(args: argparse.Namespace) -> int:
     tickets = load_tickets(args.tickets) if Path(args.tickets).exists() else []
     outcomes = load_outcomes(args.outcomes, tickets) if Path(args.outcomes).exists() else []
@@ -431,6 +526,23 @@ def build_parser() -> argparse.ArgumentParser:
     p_fetch.add_argument("--quiet", action="store_true", help="evidence only, no read line")
     p_fetch.set_defaults(func=cmd_fetch)
 
+    p_assign = sub.add_parser("assign", help="issue a research seat its work order")
+    common(p_assign)
+    p_assign.add_argument("seat", help="the seat to assign, e.g. Grok")
+    p_assign.add_argument("--assignments", default=str(DEFAULT_ASSIGNMENTS))
+    p_assign.add_argument("--now", help="ISO-8601 instant to issue as of (default: now)")
+    p_assign.add_argument("--out", help="write the assignment YAML here")
+    p_assign.add_argument("--note", help="one line of context for the seat")
+    p_assign.add_argument(
+        "--audit",
+        action="store_true",
+        help="instead of issuing, check the filed report against the standing assignment",
+    )
+    p_assign.add_argument(
+        "--strict", action="store_true", help="--audit: exit non-zero if anything is unanswered"
+    )
+    p_assign.set_defaults(func=cmd_assign)
+
     p_stamp = sub.add_parser("stamp", help="run Rails over the book")
     common(p_stamp)
     p_stamp.add_argument("--now", help="ISO-8601 instant to stamp as of (default: now)")
@@ -452,6 +564,15 @@ def build_parser() -> argparse.ArgumentParser:
     p_score.add_argument("--challenges", default=str(DEFAULT_CHALLENGES))
     p_score.add_argument("--csv")
     p_score.set_defaults(func=cmd_score)
+
+    p_coach = sub.add_parser("coach", help="grade a research seat and say what to change")
+    p_coach.add_argument("seat", nargs="?", default="Grok")
+    p_coach.add_argument("--tickets", default=str(DEFAULT_TICKETS))
+    p_coach.add_argument("--outcomes", default=str(DEFAULT_OUTCOMES))
+    p_coach.add_argument("--reports", default=str(DEFAULT_REPORTS))
+    p_coach.add_argument("--assignments", default=str(DEFAULT_ASSIGNMENTS))
+    p_coach.add_argument("--now")
+    p_coach.set_defaults(func=cmd_coach)
 
     return parser
 

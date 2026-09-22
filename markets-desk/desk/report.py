@@ -205,6 +205,30 @@ def load_reports(directory: str | Path) -> dict[str, SeatReport]:
     return newest
 
 
+def load_report_history(
+    directory: str | Path, *, seat: str | None = None
+) -> list[SeatReport]:
+    """Every report on file, oldest first — not just the current read.
+
+    `load_reports` answers "what does the desk know now", which is what gating
+    needs. Grading needs the opposite: every call a seat has ever made,
+    including the ones it has since revised, because a seat that is scored only
+    on its latest word is never scored on being wrong.
+    """
+    directory = Path(directory)
+    if not directory.exists():
+        return []
+    out: list[SeatReport] = []
+    for path in sorted(directory.rglob("*.report.*")):
+        if path.suffix not in (".yaml", ".yml", ".json"):
+            continue
+        report = load_report(path)
+        if seat is not None and report.seat.strip().lower() != seat.strip().lower():
+            continue
+        out.append(report)
+    return sorted(out, key=lambda r: r.produced_at)
+
+
 def has_hard_evidence(evidence: Iterable[Evidence]) -> bool:
     """Whether anything here is a fact about the market rather than about talk.
 
