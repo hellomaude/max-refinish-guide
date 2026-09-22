@@ -121,3 +121,33 @@ class StateTests(unittest.TestCase):
     def test_state_does_not_claim_a_live_venue(self):
         text = (ROOT / ".motif" / "STATE.md").read_text()
         self.assertIn("live:false", text.replace(" ", ""))
+
+
+class LauncherTests(unittest.TestCase):
+    """The one command that stands the desk up on a Mac."""
+
+    def _text(self) -> str:
+        return (ROOT / "install" / "launch-mac.sh").read_text()
+
+    def test_it_exists_and_is_executable(self):
+        import os
+
+        path = ROOT / "install" / "launch-mac.sh"
+        self.assertTrue(path.exists())
+        self.assertTrue(os.access(path, os.X_OK))
+
+    def test_it_runs_the_gate_before_anything_starts(self):
+        text = self._text()
+        self.assertLess(text.index("unittest discover"), text.index("install-macos.sh"))
+        self.assertIn("set -euo pipefail", text)
+
+    def test_it_never_touches_policy(self):
+        text = self._text()
+        self.assertNotIn("MODE.yaml", text.replace("never edits MODE.yaml", ""))
+        self.assertNotIn("live: true", text)
+        self.assertNotIn("sed -i", text)
+
+    def test_it_degrades_to_the_served_page_without_xcode(self):
+        text = self._text()
+        self.assertIn("xcode-select -p", text)
+        self.assertIn("served page is the UI until it is", text)
