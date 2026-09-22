@@ -111,6 +111,15 @@ argument turned entirely on wording — "signed into law" is not "Senate
 passage" and not "an SEC exemption" — and a seat cannot rules-lawyer terms it
 never fetched.
 
+**Also refused** at ≥90¢ without the annualised return **net of lock-up**,
+stated against a risk-free alternative for the same tenor. Buying the
+favourite is the right side on Polymarket — ≥90¢ purchases earn about
++0.83¢/$ and Politics runs under-confident — but collateral is locked until
+settlement and roughly half to nine-tenths of the apparent gap to $1.00 is
+the price of that delay, not mispricing. If the number does not clear the
+risk-free bar, the ticket is a savings account with resolution risk.
+`docs/EVIDENCE.md` §4 has the sources.
+
 **Cadence** with the session that needs it; depth re-read before any size.
 
 ```bash
@@ -146,10 +155,19 @@ python -m desk fetch Pulse --symbol _SPX
 
 **Files** distinct open-market buyers and sellers, notional, and filing count —
 counted by owner, not by filing, because one director filing four times is one
-opinion.
+opinion. Where owner histories are available it also files
+`opportunistic_buyers` and `routine_buyers` separately.
 
 **Refused if** a cluster is filed from an aggregator's summary. The ownership
 XML is the filing; a count either survives contact with it or it does not.
+
+**Also refused** if routine buyers are counted toward a cluster. An insider
+who bought in the same calendar month in each of the prior three years is
+buying on a calendar; such trades are more than half of all insider trades and
+carry nothing, while the opportunistic remainder carries all of the signal
+(Cohen, Malloy & Pomorski 2012 — `docs/EVIDENCE.md` §3). The adapter's
+`is_routine()` is the test. An unscreened count is filed as "routine buyers
+not yet screened", never as a cluster.
 
 **Cadence** weekdays 07:00; on any 8-K or price move worth explaining.
 
@@ -229,8 +247,13 @@ differentiated, and notice when chatter stops — as above, weakly.
 
 **Files** a `crowding` call per covered symbol — `differentiated`, `consensus`
 or `crowded` — which is the structured form of its most valuable output and is
-always bad news for the ticket. Also `excluded_sources`, since the desk bans
-pumper accounts and should see what was filtered rather than only the residue.
+always bad news for the ticket. `consensus` means **low dispersion of
+opinion** — the same argument repeated back unprompted — and `crowded` means
+position-talk: entries, targets, size. Neither means volume. Mention volume
+rises *with* a move and flags momentum, not saturation; a seat that scores
+volume will call the winners consensus, and the coach grades that as
+inverted. Also `excluded_sources`, since the desk bans pumper accounts and
+should see what was filtered rather than only the residue.
 
 **Refused if** it files a `clear` read with no evidence, rates the crowding of
 a name it did not look at, or reports volume without a baseline. "Lots of
@@ -241,6 +264,29 @@ with no obvious instrument.
 
 **Not in `required_seats`.** Gating the desk on a social feed would be the tail
 wagging the dog; Grok being dark should cost the desk nothing.
+
+### How it is steered
+
+Grok does not choose its own subjects. `python -m desk assign Grok` derives a
+work order from the open book — one crowding ask per name carrying risk, one
+catalyst ask per dated catalyst, ordered by the risk the answer could unlock
+— and writes it to `assignments/`. A social seat left to pick its own targets
+picks whatever is loudest, which is where a second opinion is worth least.
+`assign --audit` compares the filed report against the standing assignment:
+answered, unanswered, stale, unsolicited. A report can satisfy the schema
+completely while answering none of it.
+
+### How it is graded
+
+`python -m desk coach Grok` scores every crowding call against the ledger the
+way `score` scores Jev: does the call separate winners from losers. A
+`consensus` or `crowded` call is a claim the edge is gone, so a name called
+known that then worked is a call that argued a winner down. Only calls filed
+before the decision count; a call on a ticket the desk then skipped is a
+reported blind spot, not a score. The output is what to change, in the terms
+the brief already uses. Grok is the one seat that never originates a ticket
+and so never enters the ledger on its own — without this it could be wrong
+indefinitely at no cost.
 
 ---
 

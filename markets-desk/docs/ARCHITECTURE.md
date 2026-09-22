@@ -33,11 +33,13 @@ in the same factor.
 | `mode.py` | Parse and validate the policy; theme lookup, freshness lookup, venue lookup |
 | `ticket.py` | The ticket contract, and the risk→notional arithmetic Codex needs |
 | `report.py` | The seat-report contract — how any researcher, including a fleet that is not this process, hands work to the desk |
+| `assign.py` | The desk's work order to a research seat, and the audit of what came back |
+| `coach.py` | Grade a seat's crowding calls against the ledger; emit what to change |
 | `risk.py` | Rails. Per-ticket gates, then water-filling allocation under theme and heat caps |
 | `sources.py` | The data-source registry and the preflight prober |
 | `adapters/` | Per-seat fetchers returning `Evidence`: Polymarket (Odds), Hyperliquid (Chain), CBOE (Pulse), EDGAR (Shadow), FRED (Ledger) |
 | `ledger.py` | Outcome scoring and the calibration check |
-| `cli.py` | `validate`, `preflight`, `fetch`, `stamp`, `pack`, `score` |
+| `cli.py` | `validate`, `preflight`, `fetch`, `assign`, `challenge`, `stamp`, `pack`, `score`, `coach` |
 
 Stdlib only, plus PyYAML. Every dependency is something that can break at 06:30
 on a Monday, and the desk runs on one box with no one to page.

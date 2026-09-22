@@ -31,6 +31,7 @@ desk/adapters/           per-seat fetchers: Polymarket, Hyperliquid, CBOE, EDGAR
 tickets/*.ticket.yaml    the book
 challenges/*.challenge.yaml  Jev's case against each ticket
 reports/*.report.yaml    each seat's read for the session
+assignments/*.assignment.yaml  the desk's work order to a research seat
 ledger/*.outcome.yaml    what happened, for scoring
 ```
 
@@ -40,10 +41,12 @@ ledger/*.outcome.yaml    what happened, for scoring
 python -m desk validate     # refuse a malformed book before Codex sees it
 python -m desk preflight    # probe every source; name what is dark and why
 python -m desk fetch Chain  # pull a seat's evidence, paste-ready
+python -m desk assign Grok  # issue a research seat its work order from the book
 python -m desk challenge    # what Jev has not argued against yet
 python -m desk stamp        # Rails over the whole book at once
 python -m desk pack --out … # render the Codex pack
 python -m desk score        # realised hit rate, expectancy and calibration
+python -m desk coach Grok   # grade a research seat's calls and say what to change
 ```
 
 `fetch` covers the four seats no connector serves:

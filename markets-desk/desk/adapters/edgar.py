@@ -29,6 +29,14 @@ SOURCE_ID = "sec_submissions"
 OPEN_MARKET_BUY = "P"
 OPEN_MARKET_SELL = "S"
 
+# Cohen, Malloy and Pomorski (J. Finance 2012, "Decoding Inside Information")
+# split insiders into "routine" traders — who traded in the same calendar month
+# in each of the prior three years — and everyone else. Routine trades are more
+# than half the universe and carry no information about the firm; the
+# opportunistic remainder carries all of it, around 82 bp/month value-weighted.
+# A routine buyer counted toward a cluster is a calendar, not an opinion.
+ROUTINE_YEARS = 3
+
 
 @dataclass(frozen=True)
 class Filing:
@@ -142,17 +150,40 @@ def _as_instant(day: date) -> datetime:
     return datetime.combine(day, time(23, 59), tzinfo=timezone.utc)
 
 
+def is_routine(trade_on: date, prior_trades: Iterable[date]) -> bool:
+    """Whether this trade is one the insider makes every year at this time.
+
+    The test is Cohen–Malloy–Pomorski's: a trade in the same calendar month in
+    each of the prior `ROUTINE_YEARS` years. Only trades strictly before
+    `trade_on` count as history, so a trade cannot make itself routine.
+    """
+    months = {(d.year, d.month) for d in prior_trades if d < trade_on}
+    return all(
+        (trade_on.year - back, trade_on.month) in months
+        for back in range(1, ROUTINE_YEARS + 1)
+    )
+
+
 def fetch_insider_cluster(
     cik: int,
     *,
     lookback_days: int = 30,
     ticker: str = "",
+    histories: Mapping[str, Iterable[date]] | None = None,
 ) -> FetchResult:
     """Count distinct insiders buying on the open market inside a window.
 
     A cluster is several *different* people buying, which is why the count is
     of distinct owners rather than of filings — one director filing four times
     is one opinion, not four.
+
+    `histories` maps an owner name to that owner's prior open-market trade
+    dates. When it is supplied, buyers whose purchase is routine (see
+    `is_routine`) are counted separately and the cluster read excludes them.
+    Fetching an owner's history needs the reporting owner's own CIK and a
+    second submissions call per owner; that wiring is left for the desk box,
+    because this session could not reach EDGAR to test it. Without histories
+    every buyer is counted, as before, and the read says so.
     """
     since = (now_utc() - timedelta(days=lookback_days)).date()
     label = ticker or f"CIK {cik}"
@@ -172,6 +203,7 @@ def fetch_insider_cluster(
 
     buys: dict[str, float] = defaultdict(float)
     sells: dict[str, float] = defaultdict(float)
+    bought_on: dict[str, date] = {}
     unread: list[str] = []
     latest = max(f.filed_on for f in filings)
 
@@ -186,25 +218,47 @@ def fetch_insider_cluster(
                 continue
             if trade.code == OPEN_MARKET_BUY:
                 buys[trade.owner] += trade.notional or 0.0
+                if trade.traded_on and (
+                    trade.owner not in bought_on or trade.traded_on > bought_on[trade.owner]
+                ):
+                    bought_on[trade.owner] = trade.traded_on
             elif trade.code == OPEN_MARKET_SELL:
                 sells[trade.owner] += trade.notional or 0.0
 
+    routine: set[str] = set()
+    if histories is not None:
+        for owner in buys:
+            prior = histories.get(owner)
+            when = bought_on.get(owner)
+            if prior is not None and when is not None and is_routine(when, prior):
+                routine.add(owner)
+
     as_of = _as_instant(latest)
     source = "SEC EDGAR Form 4 (primary document)"
+    url = SUBMISSIONS.format(cik=cik)
     items = [
         evidence(f"{label}_insider_buyers", "filing", len(buys),
-                 source=source, as_of=as_of, url=SUBMISSIONS.format(cik=cik)),
+                 source=source, as_of=as_of, url=url),
         evidence(f"{label}_insider_sellers", "filing", len(sells),
-                 source=source, as_of=as_of, url=SUBMISSIONS.format(cik=cik)),
+                 source=source, as_of=as_of, url=url),
         evidence(f"{label}_insider_buy_notional", "filing", round(sum(buys.values()), 2),
-                 source=source, as_of=as_of, url=SUBMISSIONS.format(cik=cik)),
+                 source=source, as_of=as_of, url=url),
         evidence(f"{label}_form4_count", "filing", len(filings),
-                 source=source, as_of=as_of, url=SUBMISSIONS.format(cik=cik)),
+                 source=source, as_of=as_of, url=url),
     ]
+    if histories is not None:
+        items.append(
+            evidence(f"{label}_routine_buyers", "filing", len(routine),
+                     source=source, as_of=as_of, url=url)
+        )
+        items.append(
+            evidence(f"{label}_opportunistic_buyers", "filing", len(buys) - len(routine),
+                     source=source, as_of=as_of, url=url)
+        )
     return FetchResult(
         SOURCE_ID, ok=True, evidence=items,
         error=f"{len(unread)} filing(s) unreadable: {unread}" if unread else "",
-        raw={"buys": dict(buys), "sells": dict(sells)},
+        raw={"buys": dict(buys), "sells": dict(sells), "routine": sorted(routine)},
     )
 
 
@@ -218,6 +272,27 @@ def cluster_read(result: FetchResult, label: str) -> str:
     if count == 0:
         return f"{label}: no open-market insider buying in the window — the cluster is not there"
     amount = f" totalling ${float(notional.value):,.0f}" if notional else ""
+    routine = result.by_key(f"{label}_routine_buyers")
+    if routine is not None:
+        skipped = int(routine.value)
+        live = count - skipped
+        if live == 0:
+            return (
+                f"{label}: {count} bought but every one is routine — same month in "
+                "each of the prior three years. A calendar, not a cluster"
+            )
+        if live == 1:
+            return (
+                f"{label}: one opportunistic insider bought{amount} "
+                f"({skipped} routine excluded) — one opinion, not a cluster"
+            )
+        return (
+            f"{label}: {live} opportunistic insiders bought on the open market{amount} "
+            f"({skipped} routine excluded)"
+        )
     if count == 1:
         return f"{label}: one insider bought{amount} — one opinion, not a cluster"
-    return f"{label}: {count} distinct insiders bought on the open market{amount}"
+    return (
+        f"{label}: {count} distinct insiders bought on the open market{amount} — "
+        "routine buyers not yet screened"
+    )

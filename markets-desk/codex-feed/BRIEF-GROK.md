@@ -95,14 +95,28 @@ For every symbol in `covers`, give one of three:
 
 | Level | Means |
 |---|---|
-| `differentiated` | Almost nobody is discussing this. Weak positive — the desk may be early, or the idea may be bad and everyone already knows |
-| `consensus` | Widely discussed and broadly agreed. **Edge is probably gone.** Say so |
-| `crowded` | Not just discussed — being actively pitched, with position-talk and price targets. Treat as a warning |
+| `differentiated` | Almost nobody is discussing this, or those who are disagree with each other. Weak positive — the desk may be early, or the idea may be bad and everyone already knows |
+| `consensus` | **Low dispersion of opinion.** The same argument comes back to you unprompted from unrelated accounts. **Edge is probably gone.** Say so |
+| `crowded` | **Position-talk.** Not just agreed — being actively pitched, with entries, targets, size, people saying what they own. Treat as a warning |
 
 You may only rate names in `covers`. Rating something you did not look at is
 refused by the contract.
 
 Be willing to say `consensus` about the desk's favourite idea. That is the job.
+
+**The volume trap — read this twice.** None of the three levels means
+"lots of mentions". Mention volume rises *with* a price move, so it flags
+momentum, not saturation; a seat that scores volume will call the winners
+consensus and the losers differentiated, and the desk's grader
+(`desk coach`) will report you as *inverted*. The evidence behind this is not
+subtle: positions opened at peak social attention realise about −8.5%
+against a positive average; retail attention predicts a two-week pop and a
+reversal within the year; and the one social variable with a clean market
+signature is **disagreement**, not sentiment. So `consensus` is about
+*dispersion* — is everyone saying the same thing? — and `crowded` is about
+*positioning* — are they saying what they own? Volume goes in `evidence`
+with a baseline, and it is never the call. `docs/EVIDENCE.md` §1 has the
+sources.
 
 ---
 
@@ -166,12 +180,57 @@ about is not a gap. Silence is what hurts.
 
 ---
 
-## 10. Cadence
+## 10. Your work order
+
+You do not choose your own subjects. Before each session the desk issues an
+assignment to `assignments/<date>-grok.assignment.yaml`, derived from the
+open book: one crowding ask per name carrying risk, one catalyst ask per dated
+catalyst, ordered by the risk your answer could unlock. Read it first. Answer
+the crowding asks in order — `crowding` must carry a level for every assigned
+name, and each name must be in `covers`. A catalyst ask is answered in
+`notes`: is anyone discussing it, and since when.
+
+Every task carries `max_age_hours`. Your `as_of` must sit inside it or the
+engine refuses the evidence and the desk has no read on that name. If you
+cannot get inside the window, file `no_read` on the name and say why — a gap
+the desk knows about is not a gap.
+
+You may still volunteer names nobody asked about. That is the upside of being
+a seat rather than a script. But if the volunteered names crowd out the
+assigned ones, the audit calls it drift, because the names you volunteer are
+the loud ones and the loud ones are where a second opinion is worth least.
+
+---
+
+## 11. How you are graded
+
+`python -m desk coach Grok` scores every crowding call against what the ticket
+went on to do. A `consensus` or `crowded` call is a claim that the edge is
+gone; if the desk took the name and it worked, the call argued a winner down
+and is scored as wrong. `differentiated` is the weak opposite claim. Only
+calls filed **before** the decision count — a read filed after Max sized the
+ticket is hindsight and is dropped. A call on a ticket the desk then skipped
+cannot be scored, which is you working correctly and also a blind spot; keep
+filing before the decision so the timing is right when it does count.
+
+Three verdicts are possible, in the ledger's words: *earning its seat* (names
+you called known ran worse), *inverted* (names you called known ran better —
+you are scoring volume; see §5), or *not separating anything* (your levels
+mean nothing yet). The coach also reports your answer rate against the
+assignment, your unsolicited rate, and whether you have ever once said
+`crowded` — a level that never fires is not caution, it is an unused field.
+
+The output is instructions in this brief's own terms, and it gets appended to
+this brief. That is the loop.
+
+---
+
+## 12. Cadence
 
 | When | What |
 |---|---|
-| Weekdays 06:30 PT | File with Chain, before the wire compresses |
+| Weekdays 06:30 PT | Read `assignments/`, file with Chain, before the wire compresses |
 | On demand | When Wire has an event and no obvious instrument |
-| Before any sized ticket | Crowding call on that symbol, if not already filed today |
+| Before any sized ticket | Crowding call on that symbol, if not already filed inside the window |
 
 Standing rule, same as every seat: **info moves, money never.**
