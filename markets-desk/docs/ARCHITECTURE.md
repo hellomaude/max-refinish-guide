@@ -43,6 +43,7 @@ in the same factor.
 | `daemon.py` | The cadence from `CADENCE.yaml`; writes every session; never fetches for a seat, never confirms |
 | `notify.py` | Push via ntfy or Pushover, deduplicated per condition; may only reach notify hosts |
 | `connectors.py` | Per-seat dependency manifest; `validate` refuses unknown sources and names dark seats |
+| `apps/apple/` | Native Mac and iPhone clients of `serve`: DeskKit (models mirroring the snapshot, the client with one POST, Keychain pairing, age), DeskUI (views), two app targets. Guarded from Python by `tests/test_apple.py` |
 | `risk.py` | Rails. Per-ticket gates, then water-filling allocation under theme and heat caps |
 | `sources.py` | The data-source registry and the preflight prober |
 | `adapters/` | Per-seat fetchers returning `Evidence`: Polymarket (Odds), Hyperliquid (Chain), CBOE (Pulse), EDGAR (Shadow), FRED (Ledger) |

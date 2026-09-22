@@ -657,8 +657,18 @@ def cmd_pair(args: argparse.Namespace) -> int:
     root = Path(args.root)
     token = new_token(root)
     host = args.host or "127.0.0.1"
+    url = f"http://{host}:{args.port}/?token={token}"
     print("pairing token written to state/pair.token (old token is now invalid)")
-    print(f"open this once on the phone, then never share it:\n  http://{host}:{args.port}/?token={token}")
+    print(f"open this once on the phone, then never share it:\n  {url}")
+    if args.qr:
+        # `brew install qrencode`. Optional: the URL above is the same thing.
+        import shutil
+        import subprocess
+
+        if shutil.which("qrencode"):
+            subprocess.run(["qrencode", "-t", "ANSIUTF8", url], check=False)
+        else:
+            print("(qrencode not installed — `brew install qrencode` for a scannable code)")
     return 0
 
 
@@ -789,6 +799,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_pair.add_argument("--root", default=str(ROOT))
     p_pair.add_argument("--host", help="address the phone will use (tailnet or LAN)")
     p_pair.add_argument("--port", type=int, default=8791)
+    p_pair.add_argument("--qr", action="store_true", help="also print a scannable code (needs qrencode)")
     p_pair.set_defaults(func=cmd_pair)
 
     return parser

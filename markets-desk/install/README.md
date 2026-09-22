@@ -54,6 +54,13 @@ Then keep the Mac awake — screen sleep is fine, system sleep stops both:
 sudo pmset -a sleep 0 disksleep 0 autorestart 1
 ```
 
+## 4b. The native apps
+
+The served page works on both devices with no build. When you want the
+native apps: `apps/apple/README.md` — `brew install xcodegen`, `xcodegen
+generate`, open, run. `desk pair --qr` prints a scannable code if
+`qrencode` is installed.
+
 ## 5. Reach it from the phone
 
 `serve` binds `127.0.0.1` by default and refuses any other bind without a

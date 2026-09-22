@@ -1,0 +1,204 @@
+{
+  "generated_at": "2026-09-22T13:30:00+00:00",
+  "mode": {
+    "mode": "live_confirm",
+    "execution": "research_packs_only",
+    "updated_at": "2026-09-20T16:00:00+00:00",
+    "required_seats": [
+      "Rails"
+    ],
+    "require_challenge": true,
+    "venues": {
+      "equity": {
+        "enabled": false,
+        "live": false,
+        "note": "No equity venue named. Equity ideas may be researched and stamped but cannot be turned into order sheets. Arm this only by naming a broker here and moving execution to broker_sheets."
+      },
+      "etf": {
+        "enabled": false,
+        "live": false,
+        "note": "Same as equity \u2014 no venue named."
+      },
+      "kraken": {
+        "enabled": true,
+        "live": false,
+        "note": "Paper and intel only. No live crypto orders until Max arms them."
+      },
+      "polymarket": {
+        "enabled": true,
+        "live": false,
+        "note": "Gamma + CLOB read paths only. PublicClient, never SecureClient. No POST to /order under any circumstances."
+      },
+      "crypto_spot": {
+        "enabled": true,
+        "live": false,
+        "note": "Read-only pricing; routed to Kraken paper for any sheet."
+      },
+      "crypto_perp": {
+        "enabled": false,
+        "live": false,
+        "note": "Perp venues are read-only intel for funding and open interest. The desk does not size perp positions."
+      },
+      "option": {
+        "enabled": false,
+        "live": false,
+        "note": "No options venue named, and the greeks feed is not yet trustworthy."
+      }
+    }
+  },
+  "stamp": {
+    "stamped_at": "2026-09-22T13:30:00+00:00",
+    "mode": "live_confirm",
+    "execution": "research_packs_only",
+    "portfolio_allowed_pct": 0.0,
+    "portfolio_cap_pct": 3.0,
+    "stamps": [
+      {
+        "ticket_id": "WKND-001A",
+        "verdict": "fail",
+        "requested_pct": 0.0,
+        "allowed_pct": 0.0,
+        "theme": "crypto_policy_beta",
+        "binding_constraint": "venue.equity.disabled",
+        "challenge_verdict": "",
+        "effective_confidence": 1,
+        "reasons": [
+          "No equity venue named. Equity ideas may be researched and stamped but cannot be turned into order sheets. Arm this only by naming a broker here and moving execution to broker_sheets."
+        ],
+        "stale_evidence": [],
+        "missing_seats": [],
+        "stamp_sha256": "1b5df92e198112b1a8e875c5c83798e99b2be914ad6fab50253dc6deb98d6d3a"
+      },
+      {
+        "ticket_id": "WKND-001B",
+        "verdict": "fail",
+        "requested_pct": 0.0,
+        "allowed_pct": 0.0,
+        "theme": "crypto_policy_beta",
+        "binding_constraint": "venue.equity.disabled",
+        "challenge_verdict": "",
+        "effective_confidence": 1,
+        "reasons": [
+          "No equity venue named. Equity ideas may be researched and stamped but cannot be turned into order sheets. Arm this only by naming a broker here and moving execution to broker_sheets."
+        ],
+        "stale_evidence": [],
+        "missing_seats": [],
+        "stamp_sha256": "b179fd25c1a6559dbe095c1de0a1b507e3cf2bc391527b0933394de78cdc1477"
+      },
+      {
+        "ticket_id": "WKND-002",
+        "verdict": "fail",
+        "requested_pct": 0.5,
+        "allowed_pct": 0.0,
+        "theme": "crypto_policy_beta",
+        "binding_constraint": "staleness",
+        "challenge_verdict": "contest",
+        "effective_confidence": 3,
+        "reasons": [
+          "thesis rests on evidence past its freshness tolerance"
+        ],
+        "stale_evidence": [
+          "yes_price (price) from Polymarket Gamma (weekend pack, NOT re-verified) is 23.5h past tolerance"
+        ],
+        "missing_seats": [],
+        "stamp_sha256": "b13d65552e8e211767d1ee0ad8015f56c9b69def119e35fb99a35f31d3c9f76b"
+      },
+      {
+        "ticket_id": "WKND-004",
+        "verdict": "fail",
+        "requested_pct": 0.0,
+        "allowed_pct": 0.0,
+        "theme": "insider_shipping",
+        "binding_constraint": "venue.equity.disabled",
+        "challenge_verdict": "",
+        "effective_confidence": 1,
+        "reasons": [
+          "No equity venue named. Equity ideas may be researched and stamped but cannot be turned into order sheets. Arm this only by naming a broker here and moving execution to broker_sheets."
+        ],
+        "stale_evidence": [],
+        "missing_seats": [],
+        "stamp_sha256": "b77f6b1f3582e3f6c062d4ed80c997b7577929aa48538fc65fc5ee046db11412"
+      },
+      {
+        "ticket_id": "WKND-005",
+        "verdict": "pending",
+        "requested_pct": 0.0,
+        "allowed_pct": 0.0,
+        "theme": "crypto_policy_beta",
+        "binding_constraint": "unchallenged",
+        "challenge_verdict": "",
+        "effective_confidence": 1,
+        "reasons": [
+          "no challenge on record; the desk does not size a thesis nobody argued against"
+        ],
+        "stale_evidence": [],
+        "missing_seats": [],
+        "stamp_sha256": "b279bc7f07e9302fa1d2da1225d61e4ba69b0e7b8e750f3f40d3b19958d40940"
+      }
+    ]
+  },
+  "reports": {},
+  "assignments": {
+    "Grok": {
+      "issued_at": "2026-09-22T13:30:00+00:00",
+      "at_stake_pct": 2.25,
+      "tasks": [
+        "WKND-005:crowding",
+        "WKND-001A:crowding",
+        "WKND-001B:crowding",
+        "WKND-004:crowding",
+        "WKND-002:catalyst",
+        "WKND-002:crowding"
+      ],
+      "coverage": {
+        "assigned": 5,
+        "answered": [],
+        "unanswered": [
+          "BTC",
+          "COIN",
+          "HOOD",
+          "SBLK",
+          "clarity-act-signed-2026"
+        ],
+        "stale": [],
+        "unsolicited": []
+      }
+    }
+  },
+  "confirmations": {},
+  "ledger": {},
+  "sources": {},
+  "event_windows": [
+    {
+      "id": "us-flash-pmi-2026-09-23",
+      "starts_at": "2026-09-22T19:55:00+00:00",
+      "ends_at": "2026-09-23T14:30:00+00:00",
+      "applies_to_kinds": [
+        "equity",
+        "etf",
+        "crypto_spot",
+        "crypto_perp",
+        "option"
+      ]
+    },
+    {
+      "id": "cost-earnings-2026-09-24",
+      "starts_at": "2026-09-24T19:55:00+00:00",
+      "ends_at": "2026-09-25T14:00:00+00:00",
+      "applies_to_kinds": [
+        "equity",
+        "etf",
+        "option"
+      ]
+    }
+  ],
+  "health": {
+    "dark_seats": [
+      "Ledger: dark dependency ['fred', 'sec_companyfacts', 'treasury_yield_curve'] \u2014 files blind until it is back",
+      "Chain: dark dependency ['hyperliquid_info', 'coinglass', 'coinalyze'] \u2014 files blind until it is back",
+      "Odds: dark dependency ['polymarket_gamma', 'polymarket_clob'] \u2014 files blind until it is back",
+      "Pulse: dark dependency ['cboe_delayed_chain', 'alpha_vantage_options'] \u2014 files blind until it is back",
+      "Shadow: dark dependency ['sec_submissions', 'sec_fulltext'] \u2014 files blind until it is back"
+    ]
+  }
+}

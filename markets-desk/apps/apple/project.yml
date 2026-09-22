@@ -1,0 +1,55 @@
+# XcodeGen spec. `brew install xcodegen && xcodegen generate` → Desk.xcodeproj.
+# Two app targets over the same DeskKit/DeskUI packages. Nothing here is signed
+# for distribution; these are Max's own devices.
+name: Desk
+options:
+  bundleIdPrefix: com.maxmotif
+  deploymentTarget:
+    macOS: "14.0"
+    iOS: "17.0"
+packages:
+  Desk:
+    path: .
+targets:
+  DeskMac:
+    type: application
+    platform: macOS
+    sources: [Sources/DeskMac]
+    dependencies:
+      - package: Desk
+        product: DeskKit
+      - package: Desk
+        product: DeskUI
+    info:
+      path: Sources/DeskMac/Info.plist
+      properties:
+        CFBundleDisplayName: Markets Desk
+        NSAppTransportSecurity:
+          # The desk is served over http on loopback or the tailnet. There is
+          # no public host and no TLS to pin; the token is the credential.
+          NSAllowsLocalNetworking: true
+    settings:
+      base:
+        SWIFT_STRICT_CONCURRENCY: complete
+  DeskPhone:
+    type: application
+    platform: iOS
+    sources: [Sources/DeskPhone]
+    dependencies:
+      - package: Desk
+        product: DeskKit
+      - package: Desk
+        product: DeskUI
+    info:
+      path: Sources/DeskPhone/Info.plist
+      properties:
+        CFBundleDisplayName: Markets Desk
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        NSFaceIDUsageDescription: Confirming a ticket requires Face ID. A confirm is Max's yes and nobody else's.
+        NSCameraUsageDescription: Scanning the pairing code the Mac shows. Nothing else.
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
+    settings:
+      base:
+        SWIFT_STRICT_CONCURRENCY: complete

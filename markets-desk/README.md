@@ -33,6 +33,7 @@ desk/adapters/           per-seat fetchers: Polymarket, Hyperliquid, CBOE, EDGAR
 tickets/*.ticket.yaml    the book
 challenges/*.challenge.yaml  Jev's case against each ticket
 reports/*.report.yaml    each seat's read for the session
+apps/apple/               the Mac and iPhone apps (SwiftUI) over `desk serve`; see its README
 assignments/*.assignment.yaml  the desk's work order to a research seat
 confirmations/*.confirm.yaml  Max's yes, one ticket one session; Codex reads it before any sheet
 sheets/  stamps/  packs/  preflight/  state/   what the daemon writes (gitignored but state/env is yours)
