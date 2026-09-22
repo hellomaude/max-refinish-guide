@@ -3,7 +3,7 @@ Idea: A research desk of model-held seats whose output a risk engine stamps with
 Track: build → land on box
 Stage: system built — confirm contract, sheet path, serve + page, daemon + push, pair, install kit, connector manifest; native Mac + iPhone source written under apps/apple (uncompiled here); no adapter has touched a live endpoint
 Started: 2026-09-20
-Branch: main (PR #1 merged at 5e5ab79); follow-ups on codex/desk-* or claude/*
+Branch: main (PRs #1, #3, #4, #5 merged; latest c95b039); follow-ups on codex/desk-* or claude/*
 Decisions: MODE.yaml is the authority; the engine executes it, prose does not interpret it.
 Decisions: mode live_confirm, execution research_packs_only; every venue live:false; equity/etf/perp/option enabled:false. Arming is Max's edit alone.
 Decisions: Correlated ideas share one theme cap; water-filling allocates under it; a single-name override is a one-member theme.
