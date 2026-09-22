@@ -1,7 +1,8 @@
 # Markets Desk — agent instructions
 
 Read this first, whatever you are. Codex reads it natively; Claude reads
-`CLAUDE.md`, which points here. `HANDOFF.md` has the plan and the state.
+`CLAUDE.md`, which points here. `GOAL.md` is the goal and the loop;
+`HANDOFF.md` and `HANDOFF-NATIVE.md` are the plans; `.motif/STATE.md` is the state.
 
 ## Identity
 

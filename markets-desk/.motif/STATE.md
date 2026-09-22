@@ -1,9 +1,9 @@
 # Markets Desk
 Idea: A research desk of model-held seats whose output a risk engine stamps with ceilings, so Codex can format order sheets only inside them and only after Max confirms.
 Track: build → land on box
-Stage: built and tested against fixtures; unmerged; no adapter has touched a live endpoint
+Stage: merged to main 2026-09-22 (268 tests); no adapter has touched a live endpoint; GOAL.md is the loop
 Started: 2026-09-20
-Branch: claude/financial-system-codex-grokvot-3ho3jh (PR #1, draft, green, mergeable)
+Branch: main (PR #1 merged at 5e5ab79); follow-ups on codex/desk-* or claude/*
 Decisions: MODE.yaml is the authority; the engine executes it, prose does not interpret it.
 Decisions: mode live_confirm, execution research_packs_only; every venue live:false; equity/etf/perp/option enabled:false. Arming is Max's edit alone.
 Decisions: Correlated ideas share one theme cap; water-filling allocates under it; a single-name override is a one-member theme.
@@ -17,10 +17,10 @@ Decisions: Grok is steered by desk-issued assignments and graded by desk coach; 
 Decisions: No finance fine-tunes; general models plus contracts.
 Decisions: One allowlisted POST in adapters/base.py; PUT/PATCH/DELETE banned everywhere.
 Decisions: The ledger scores forward only; no backfilled outcomes.
-Open: Max — merge PR #1; name an equity venue or not; keep require_challenge true (recommended).
+Open: Max — name an equity venue or not (after paper); keep require_challenge true (recommended).
 Open: Box — preflight all 18 sources; wire EDGAR owner histories; re-verify WKND-002; Grok's first report.
 Open: Native — confirm contract (N0), desk serve (N1), daemon + push (N2), Mac app (N3), iPhone (N4), two weeks paper (N5). See HANDOFF-NATIVE.md.
 Decisions: The native app is the window, the gate and the alarm — never a router. A confirm is a file Codex must read before any sheet; it requires verdict pass, a matching stamp hash, and Max.
 Decisions: The iPhone holds no model, no key, no pack; desk serve has exactly one mutating route, /confirm.
 Decisions: The HTML dashboard is superseded by the Mac app; build it only as a no-Apple fallback.
-Artifacts: plan=HANDOFF.md native=HANDOFF-NATIVE.md doctrine=codex-feed/DOCTRINE.md seats=docs/SEATS.md models=docs/MODELS.md open-weight=docs/OPEN-WEIGHT.md evidence=docs/EVIDENCE.md risk=docs/RISK-MODEL.md pr=hellomaude/max-refinish-guide#1
+Artifacts: goal=GOAL.md plan=HANDOFF.md native=HANDOFF-NATIVE.md doctrine=codex-feed/DOCTRINE.md seats=docs/SEATS.md models=docs/MODELS.md open-weight=docs/OPEN-WEIGHT.md evidence=docs/EVIDENCE.md risk=docs/RISK-MODEL.md pr=hellomaude/max-refinish-guide#1
