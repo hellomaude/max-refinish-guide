@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parent.parent
 
 class PresenceTests(unittest.TestCase):
     def test_every_agent_entry_point_exists(self):
-        for name in ("AGENTS.md", "CLAUDE.md", "GOAL.md", "HANDOFF.md", "HANDOFF-NATIVE.md",
+        for name in ("AGENTS.md", "CLAUDE.md", "GOAL.md", "HANDOFF.md", "HANDOFF-NATIVE.md", "HANDOFF-LOCAL.md",
                      ".motif/STATE.md", "prompts/README.md"):
             self.assertTrue((ROOT / name).exists(), f"{name} missing")
 
@@ -121,6 +121,26 @@ class StateTests(unittest.TestCase):
     def test_state_does_not_claim_a_live_venue(self):
         text = (ROOT / ".motif" / "STATE.md").read_text()
         self.assertIn("live:false", text.replace(" ", ""))
+
+
+class LocalHandoffTests(unittest.TestCase):
+    def _text(self) -> str:
+        return (ROOT / "HANDOFF-LOCAL.md").read_text()
+
+    def test_it_is_for_the_mac_and_starts_with_the_launcher(self):
+        text = self._text()
+        self.assertIn("launch-mac.sh", text)
+        self.assertLess(text.index("L0"), text.index("L1"))
+
+    def test_it_never_asks_to_edit_policy_to_get_a_pass(self):
+        text = self._text()
+        self.assertIn("Never** edit the real `MODE.yaml`", text)
+        self.assertIn("temporary copy", text)
+
+    def test_it_keeps_the_swift_guard_rules(self):
+        text = self._text()
+        for needle in ('httpMethod = "POST"', "SecItem", "AgeLabel"):
+            self.assertIn(needle, text)
 
 
 class LauncherTests(unittest.TestCase):

@@ -403,6 +403,7 @@ your phase.
 markets-desk/
   HANDOFF.md                  ← this
   HANDOFF-NATIVE.md           the Mac + iPhone agent; after Phases 0–3
+  HANDOFF-LOCAL.md            what only a session on the Mac can do; start here on the box
   AGENTS.md CLAUDE.md         what every agent reads first
   .motif/STATE.md             compact state; update on every decision
   prompts/                    paste-ready prompts for web-chat seats

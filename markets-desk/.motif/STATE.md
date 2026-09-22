@@ -19,10 +19,10 @@ Decisions: One allowlisted POST in adapters/base.py; PUT/PATCH/DELETE banned eve
 Decisions: The ledger scores forward only; no backfilled outcomes.
 Open: Max — name an equity venue or not (after paper); keep require_challenge true (recommended).
 Open: Box — preflight all 18 sources; wire EDGAR owner histories; re-verify WKND-002; Grok's first report.
-Open: Native — compile apps/apple on the Mac (xcodegen generate; swift test; ⌘R), fix what the compiler catches; two weeks paper (N5). See HANDOFF-NATIVE.md §3b.
+Open: Local (HANDOFF-LOCAL.md L0–L6) — run the launcher, compile apps/apple on the Mac (xcodegen generate; swift test; ⌘R), fix what the compiler catches; two weeks paper (N5). See HANDOFF-NATIVE.md §3b.
 Decisions: The native app is the window, the gate and the alarm — never a router. A confirm is a file Codex must read before any sheet; it requires verdict pass, a matching stamp hash, and Max.
 Decisions: The iPhone holds no model, no key, no pack; desk serve has exactly one mutating route, /confirm.
 Decisions: The served page (desk serve) is the UI on both Mac and iPhone until the native apps exist; it has one write, /confirm, and every timestamp shows its age.
 Decisions: A confirm's digest binds the stamp and the mode; the book moving voids it and the daemon pushes.
 Decisions: Push may reach only ntfy or Pushover; the daemon never fetches for a seat and never confirms.
-Artifacts: goal=GOAL.md plan=HANDOFF.md native=HANDOFF-NATIVE.md doctrine=codex-feed/DOCTRINE.md seats=docs/SEATS.md models=docs/MODELS.md open-weight=docs/OPEN-WEIGHT.md evidence=docs/EVIDENCE.md risk=docs/RISK-MODEL.md pr=hellomaude/max-refinish-guide#1
+Artifacts: goal=GOAL.md local=HANDOFF-LOCAL.md plan=HANDOFF.md native=HANDOFF-NATIVE.md doctrine=codex-feed/DOCTRINE.md seats=docs/SEATS.md models=docs/MODELS.md open-weight=docs/OPEN-WEIGHT.md evidence=docs/EVIDENCE.md risk=docs/RISK-MODEL.md pr=hellomaude/max-refinish-guide#1

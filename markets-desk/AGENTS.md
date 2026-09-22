@@ -2,7 +2,8 @@
 
 Read this first, whatever you are. Codex reads it natively; Claude reads
 `CLAUDE.md`, which points here. `GOAL.md` is the goal and the loop;
-`HANDOFF.md` and `HANDOFF-NATIVE.md` are the plans; `.motif/STATE.md` is the state.
+`HANDOFF.md` and `HANDOFF-NATIVE.md` are the plans; `HANDOFF-LOCAL.md` is the
+part only a session on Max's Mac can do; `.motif/STATE.md` is the state.
 
 ## Identity
 
