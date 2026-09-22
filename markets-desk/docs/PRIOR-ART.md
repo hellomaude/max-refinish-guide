@@ -174,11 +174,6 @@ collection — the README is explicit that there is no central service, which is
 the opposite of what a tracker needs. Nothing here serves the desk, and the
 licence rules out commercial use regardless.
 
-*You flagged this and Kestra as "maybe for the veil tracker". I do not know what
-the veil tracker is — it has not come up in this session and is not in the
-handoff. Kestra could plausibly schedule one; Jarvis could not. Say what it
-tracks and I will assess properly.*
-
 ---
 
 ## Not relevant: AppFlowy, Leantime
