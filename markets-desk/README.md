@@ -33,7 +33,10 @@ desk/adapters/           per-seat fetchers: Polymarket, Hyperliquid, CBOE, EDGAR
 tickets/*.ticket.yaml    the book
 challenges/*.challenge.yaml  Jev's case against each ticket
 reports/*.report.yaml    each seat's read for the session
+apps/apple/               the Mac and iPhone apps (SwiftUI) over `desk serve`; see its README
 assignments/*.assignment.yaml  the desk's work order to a research seat
+confirmations/*.confirm.yaml  Max's yes, one ticket one session; Codex reads it before any sheet
+sheets/  stamps/  packs/  preflight/  state/   what the daemon writes (gitignored but state/env is yours)
 ledger/*.outcome.yaml    what happened, for scoring
 ```
 
@@ -49,6 +52,11 @@ python -m desk stamp        # Rails over the whole book at once
 python -m desk pack --out … # render the Codex pack
 python -m desk score        # realised hit rate, expectancy and calibration
 python -m desk coach Grok   # grade a research seat's calls and say what to change
+python -m desk confirm WKND-005 --device iphone   # Max's yes, as a file
+python -m desk sheet WKND-005 --risk-budget 100000  # a sheet, only from a confirm
+python -m desk serve        # the page + API on 127.0.0.1:8791; one write: /confirm
+python -m desk daemon       # run codex-feed/CADENCE.yaml; push what needs Max
+python -m desk pair         # mint the token a phone needs to confirm
 ```
 
 `fetch` covers the four seats no connector serves:

@@ -48,7 +48,16 @@ FORBIDDEN_METHODS = ("PUT", "PATCH", "DELETE")
 # that works from this box, or writing the verb obliquely to dodge the check.
 # So POST is confined to one module and the payloads it may send are pinned
 # below. Widening either is a visible diff.
-POST_ALLOWED_FILES = {"desk/adapters/base.py"}
+#
+# Two later additions, each with its own pin further down:
+#   desk/ui.py    — the page's single fetch, to the confirm route, as a JS string
+#   desk/serve.py — the server that *receives* that one POST; it sends none
+POST_ALLOWED_FILES = {"desk/adapters/base.py", "desk/ui.py", "desk/serve.py"}
+
+# The only hosts a push may go to. A push service cannot place an order.
+NOTIFY_HOSTS_EXPECTED = ("ntfy.sh", "api.pushover.net")
+MARKET_HOST_FRAGMENTS = ("polymarket", "hyperliquid", "kraken", "binance", "bybit",
+                         "deribit", "coinbase", "ibkr", "interactivebrokers", "alpaca")
 
 
 def _python_files() -> list[Path]:
@@ -113,6 +122,76 @@ class ExecutionBoundaryTests(unittest.TestCase):
                         )
         self.assertEqual(offenders, [], "mutating HTTP in a read-only data layer")
 
+    def test_the_server_has_exactly_one_mutating_route(self):
+        """`desk serve` may receive one write: the confirm. Adding a second is
+        the diff this test exists to surface."""
+        from desk import serve
+
+        self.assertEqual(serve.MUTATING_ROUTES, ("/confirm",))
+        source = (PACKAGE / "serve.py").read_text(encoding="utf-8")
+        for verb in ("do_PUT", "do_PATCH", "do_DELETE"):
+            self.assertNotIn(verb, source, f"serve.py handles {verb}")
+        self.assertEqual(source.count("def do_POST"), 1)
+        # The POST handler dispatches only through MUTATING_ROUTES.
+        self.assertIn("if path not in MUTATING_ROUTES", source)
+
+    def test_the_page_makes_exactly_one_non_read_request(self):
+        """The UI is a window with one button. Count the fetches."""
+        from desk import ui
+
+        source = (PACKAGE / "ui.py").read_text(encoding="utf-8")
+        self.assertEqual(source.count("fetch("), 1, "the page has more than one fetch")
+        self.assertEqual(source.count("XMLHttpRequest"), 0)
+        self.assertEqual(source.count("<form"), 0)
+        self.assertEqual(ui.CONFIRM_ROUTE, "/confirm")
+        self.assertIn("fetch('/confirm'", source.replace("%CONFIRM%", ui.CONFIRM_ROUTE))
+
+    def test_push_targets_only_notify_hosts(self):
+        """The push module is the one place a non-read request leaves the
+        desk, and it may only reach a push service."""
+        from desk import notify
+
+        self.assertEqual(notify.NOTIFY_HOSTS, NOTIFY_HOSTS_EXPECTED)
+        for host in notify.NOTIFY_HOSTS:
+            for fragment in MARKET_HOST_FRAGMENTS:
+                self.assertNotIn(fragment, host, f"{host} looks like a market host")
+        source = (PACKAGE / "notify.py").read_text(encoding="utf-8")
+        for url in re.findall(r"https://([^/\"'\s]+)", source):
+            self.assertIn(url, notify.NOTIFY_HOSTS, f"notify.py references {url}")
+
+    def test_a_sheet_cannot_be_formatted_without_a_confirm(self):
+        """The signature is the rule. Removing the parameter is a visible diff."""
+        import inspect
+
+        from desk import sheet
+        from desk.confirm import Confirm
+
+        params = inspect.signature(sheet.format_sheet).parameters
+        self.assertIn("confirm", params)
+        self.assertIs(params["confirm"].default, inspect.Parameter.empty,
+                      "confirm must be required, not optional")
+        self.assertEqual(sheet.format_sheet.__annotations__.get("confirm"), "Confirm")
+        # And no other module writes into sheets/.
+        for path in _python_files():
+            if path.name in ("sheet.py", "cli.py"):
+                continue
+            self.assertNotIn("write_sheet", path.read_text(encoding="utf-8"),
+                             f"{path.name} writes sheets")
+
+    def test_only_max_confirms(self):
+        from desk import confirm
+
+        self.assertEqual(confirm.CONFIRMER, "max")
+
+    def test_the_daemon_never_fetches_for_a_seat_or_confirms(self):
+        from desk import daemon
+
+        self.assertNotIn("fetch", daemon.STEPS)
+        self.assertNotIn("confirm", daemon.STEPS)
+        source = (PACKAGE / "daemon.py").read_text(encoding="utf-8")
+        self.assertNotIn("make_confirm", source)
+        self.assertNotIn("write_confirm", source)
+
     def test_source_registry_holds_no_credentials(self):
         """Keys live in the environment. A literal in the registry is a leak."""
         text = (ROOT / "codex-feed" / "sources.yaml").read_text(encoding="utf-8")
@@ -122,10 +201,15 @@ class ExecutionBoundaryTests(unittest.TestCase):
         self.assertEqual(suspicious, [], "credential literal in sources.yaml")
 
     def test_adapter_endpoints_are_https(self):
+        """Every outbound endpoint is https. The one exemption is the desk's
+        own loopback server, whose address `serve` and `pair` print for Max
+        to open — that URL is never fetched by the package."""
         import re as _re
 
         for path in _python_files():
             for url in _re.findall(r"[\"']((?:http|ftp)[^\"'\s]*)[\"']", path.read_text(encoding="utf-8")):
+                if url.startswith(("http://127.0.0.1", "http://{")) and path.name in ("cli.py", "serve.py"):
+                    continue
                 self.assertTrue(
                     url.startswith("https://"),
                     f"{path.relative_to(ROOT)} references a non-https endpoint: {url}",

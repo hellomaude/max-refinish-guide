@@ -1,0 +1,43 @@
+# The desk's clock. Read by `desk daemon`. Times are America/Los_Angeles.
+#
+# Each slot runs its steps in order and stops at the first that fails hard.
+# A failed step is never silent: it writes to the session log and, if it is
+# the kind of failure Max should know about, it pushes.
+#
+# `fetch` is deliberately absent. Seats file their own reports; the daemon
+# does not guess which slug, coin or CIK a seat meant to look at today.
+
+schema_version: 1
+timezone: America/Los_Angeles
+
+slots:
+  - id: morning
+    days: [mon, tue, wed, thu, fri]
+    at: "06:30"
+    steps: [preflight, assign, challenge, stamp, pack]
+  - id: open
+    days: [mon, tue, wed, thu, fri]
+    at: "09:45"
+    steps: [stamp, pack]
+  - id: midday
+    days: [mon, tue, wed, thu, fri]
+    at: "12:30"
+    steps: [stamp, pack]
+  - id: close
+    days: [mon, tue, wed, thu, fri]
+    at: "13:15"
+    steps: [stamp, pack, expire]
+  - id: weekly_rails
+    days: [mon]
+    at: "08:00"
+    steps: [validate]
+  - id: weekend
+    days: [sat, sun]
+    at: "09:00"
+    steps: [preflight, assign, stamp, pack]
+
+# Push conditions. Each has a key so a stuck state notifies once per
+# cooldown rather than every slot. Hours.
+push:
+  cooldown_hours: 4
+  required_seat_grace_minutes: 15

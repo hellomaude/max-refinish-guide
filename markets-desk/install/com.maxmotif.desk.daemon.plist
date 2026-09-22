@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.maxmotif.desk.daemon</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>-lc</string>
+    <string>cd "$DESK_ROOT" && set -a && . state/env && set +a && exec .venv/bin/python -m desk daemon</string>
+  </array>
+  <key>EnvironmentVariables</key>
+  <dict><key>DESK_ROOT</key><string>__DESK_ROOT__</string></dict>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>StandardOutPath</key><string>__DESK_ROOT__/state/daemon.out.log</string>
+  <key>StandardErrorPath</key><string>__DESK_ROOT__/state/daemon.err.log</string>
+</dict>
+</plist>

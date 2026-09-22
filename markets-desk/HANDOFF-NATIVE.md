@@ -123,6 +123,30 @@ per order.
 
 ---
 
+## 3b. What is built, as of 2026-09-22
+
+The package side of this handoff exists and is under test:
+
+| Piece | State |
+|---|---|
+| `desk/confirm.py`, `confirmations/`, `desk confirm` | **Built.** Refuses PENDING/FAIL, non-Max, stale digest, expiry, >24h |
+| `desk/sheet.py`, `desk sheet` | **Built.** `format_sheet` requires a `Confirm`; boundary test pins the signature |
+| `desk serve` | **Built.** Page + JSON API; exactly one mutating route; token-gated; loopback default |
+| The page (`desk/ui.py`) | **Built.** Served HTML, works in Safari on Mac and iPhone; hold-to-confirm; every timestamp shows age |
+| `desk daemon`, `CADENCE.yaml` | **Built.** Runs slots, writes preflight/assign/stamp/pack, pushes on the conditions in N2 |
+| `desk/notify.py` | **Built.** ntfy or Pushover, deduplicated per condition per cooldown |
+| `desk pair`, `install/` | **Built.** Token minting, LaunchAgents for serve and daemon, env template |
+| `codex-feed/connectors.json` | **Built.** `validate` asserts seat dependencies |
+| Native Mac app (N3) | **Source written**, `apps/apple/Sources/DeskMac` over DeskKit/DeskUI. Not compiled here — no Swift toolchain in this session. `xcodegen generate`, open, ⌘R |
+| Native iPhone app (N4) | **Source written**, `apps/apple/Sources/DeskPhone`. Hold + Face ID confirm flow; pairing by pasted URL or `onOpenURL`. Not compiled here |
+| `apps/apple` guard | **Built.** `tests/test_apple.py` reads the Swift source: one POST, to `/confirm`; no keys, models or pack; Keychain holds only the pairing; every date through `AgeLabel`; fixture regenerated from the desk so the Swift model cannot drift from the server |
+
+The served page *is* the window, the gate and the alarm today. The native
+apps are written over the same `serve` API and wait only for a Mac with
+Xcode to compile them: `apps/apple/README.md`. The first build will surface
+whatever a compiler catches that a grep cannot; expect a short round of
+type fixes, not a redesign.
+
 ## 4. The plan, in order
 
 Prerequisites: `HANDOFF.md` Phases 0–3 done (landed, data layer proven live,
