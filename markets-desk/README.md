@@ -8,6 +8,8 @@ the desk actually got right.
 transaction, or connects a wallet. Every allowance it produces is a ceiling for
 Codex to work inside, and Max gates every order. See `codex-feed/DOCTRINE.md`.
 
+**Picking this up?** Start with [`HANDOFF.md`](HANDOFF.md) — state, plan, and the gate that is Max's alone.
+
 ## Why this exists
 
 The desk it replaces worked, but three things were carried by hand:
