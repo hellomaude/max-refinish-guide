@@ -207,7 +207,16 @@ Per phase, in the PR body and to Max:
 
 ## 5. Where you are
 
-`main` at the #4 merge carries everything; PR #5 adds the launcher. Nothing
-has run on a Mac. Start at L0. The first thing you will learn is what the
-Swift compiler thinks of code written blind, and that is the most useful
-thing anyone on this project has not yet learned.
+`main` at the #5 merge (`c95b039`, 2026-09-22) carries everything: the
+desk, the system layer, both apps' source, the launcher, and this file.
+348 Python tests green in CI. Two review findings on the launcher were
+fixed before merge (full-Xcode detection; `open --env` for the root).
+Nothing has run on a Mac. Start at L0:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/hellomaude/max-refinish-guide/main/markets-desk/install/launch-mac.sh | bash
+```
+
+The first thing you will learn is what the Swift compiler thinks of code
+written blind, and that is the most useful thing anyone on this project has
+not yet learned.
