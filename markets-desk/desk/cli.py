@@ -116,7 +116,9 @@ def cmd_validate(args: argparse.Namespace) -> int:
         try:
             roster = load_roster(args.roster)
             counts = ", ".join(f"{m} {n}" for m, n in sorted(roster.concentration().items()))
-            print(f"roster    ok   {len(roster.seats)} seats ({counts})")
+            local = [s for s in roster.seats if roster.leaves_box(s) is False]
+            print(f"roster    ok   {len(roster.seats)} seats ({counts}); "
+                  f"{len(local)} on the box: {', '.join(local) or 'none'}")
             problems.extend(check_filings(roster, tickets, challenges))
             kept, dropped = roster.independent_challenges(tickets, challenges)
             for line in dropped:

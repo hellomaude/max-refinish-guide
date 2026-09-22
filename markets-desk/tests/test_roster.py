@@ -29,12 +29,14 @@ def build_roster(**overrides: Any):
             "claude": {"vendor": "Anthropic", "strengths": "plumbing"},
             "grok": {"vendor": "xAI", "strengths": "live X"},
             "gemini": {"vendor": "Google", "strengths": "search grounding"},
+            "gpt-oss-120b": {"vendor": "OpenAI", "hosting": "local", "strengths": "local adversary"},
         },
         "seats": {
             "Chain": {"model": "claude", "why": "adapter-fed"},
             "Wire": {"model": "gemini", "why": "search grounding"},
             "Grok": {"model": "grok", "why": "live X"},
-            "Jev": {"model": "any", "why": "whichever model did not write the ticket"},
+            "Jev": {"model": "any", "pool": ["gpt-oss-120b", "gemini"],
+                    "why": "whichever model did not write the ticket"},
         },
         "rules": {"adversary_must_differ": True, "max_research_seats_per_model": 6},
     }
@@ -171,3 +173,74 @@ class ScoreByModelTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class OpenWeightTests(unittest.TestCase):
+    """Open weights earn seats on privacy, cost and vendor-independence — not
+    on being smarter. The rules below are what make that true in code."""
+
+    def _roster(self, **overrides: Any):
+        base: dict[str, Any] = {
+            "schema_version": 1,
+            "updated_at": "2026-09-22T08:00:00-07:00",
+            "models": {
+                "claude": {"vendor": "Anthropic", "hosting": "api", "strengths": "x"},
+                "gpt-oss-120b": {"vendor": "OpenAI", "hosting": "local", "strengths": "x"},
+                "qwen3.6-27b": {"vendor": "Alibaba", "hosting": "local", "strengths": "x"},
+            },
+            "seats": {
+                "Odds": {"model": "claude", "why": "reading"},
+                "Chain": {"model": "qwen3.6-27b", "why": "adapter-fed"},
+                "Jev": {"model": "any", "pool": ["gpt-oss-120b", "claude"], "why": "differs"},
+            },
+        }
+        base.update(overrides)
+        return parse_roster(base, where="test-roster")
+
+    def test_the_adversary_pool_must_include_a_local_model(self):
+        with self.assertRaises(ValidationError) as caught:
+            self._roster(seats={
+                "Odds": {"model": "claude", "why": "x"},
+                "Jev": {"model": "any", "pool": ["claude"], "why": "x"},
+            })
+        self.assertIn("no local model", str(caught.exception))
+
+    def test_a_pool_member_must_be_declared(self):
+        with self.assertRaises(ValidationError) as caught:
+            self._roster(seats={
+                "Jev": {"model": "any", "pool": ["gpt-oss-120b", "mystery"], "why": "x"},
+            })
+        self.assertIn("undeclared model 'mystery'", str(caught.exception))
+
+    def test_a_fallback_must_be_declared(self):
+        with self.assertRaises(ValidationError) as caught:
+            self._roster(seats={
+                "Odds": {"model": "claude", "fallback": "nope", "why": "x"},
+                "Jev": {"model": "any", "pool": ["gpt-oss-120b"], "why": "x"},
+            })
+        self.assertIn("fallback", str(caught.exception))
+
+    def test_an_unknown_hosting_is_refused(self):
+        with self.assertRaises(ValidationError) as caught:
+            self._roster(models={"x": {"vendor": "v", "hosting": "cloud", "strengths": "s"}},
+                         seats={"Jev": {"model": "any", "pool": [], "why": "x"}})
+        self.assertIn("hosting", str(caught.exception))
+
+    def test_leaves_box_reads_hosting(self):
+        roster = self._roster()
+        self.assertTrue(roster.leaves_box("Odds"))
+        self.assertFalse(roster.leaves_box("Chain"))
+        self.assertIsNone(roster.leaves_box("Jev"))
+
+    def test_the_shipped_roster_keeps_the_pack_on_the_box(self):
+        """CoS writes the pack — the most sensitive document on the desk."""
+        roster = load_roster(ROOT / "codex-feed" / "ROSTER.yaml")
+        self.assertFalse(roster.leaves_box("CoS"))
+        self.assertIn("gpt-oss-120b", roster.adversary_pool())
+        self.assertTrue(roster.local_models())
+
+    def test_a_local_proposer_still_gets_a_non_local_adversary_in_the_pool(self):
+        """Qwen seats need a non-Qwen challenger available."""
+        roster = load_roster(ROOT / "codex-feed" / "ROSTER.yaml")
+        pool = set(roster.adversary_pool())
+        self.assertTrue(pool - {"qwen3.6-27b"})

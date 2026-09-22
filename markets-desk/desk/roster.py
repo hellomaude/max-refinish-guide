@@ -33,11 +33,20 @@ ANY_MODEL = "any"
 NON_RESEARCH = ("Codex", "Jev")
 
 
+HOSTINGS = ("local", "api")
+
+
 @dataclass(frozen=True)
 class ModelSpec:
     id: str
     vendor: str
     strengths: str
+    hosting: str = "api"
+    license: str = ""
+
+    @property
+    def is_local(self) -> bool:
+        return self.hosting == "local"
 
 
 @dataclass(frozen=True)
@@ -45,6 +54,8 @@ class SeatAssignment:
     seat: str
     model: str
     why: str
+    pool: tuple[str, ...] = ()
+    fallback: str = ""
 
 
 @dataclass(frozen=True)
@@ -53,9 +64,29 @@ class Roster:
     models: Mapping[str, ModelSpec]
     seats: Mapping[str, SeatAssignment]
     adversary_must_differ: bool = True
+    adversary_pool_needs_local: bool = True
     score_by_model: bool = True
     max_research_seats_per_model: int = 6
     raw: Mapping[str, Any] = field(default_factory=dict, repr=False)
+
+    def leaves_box(self, seat: str) -> bool | None:
+        """Whether what this seat reads is sent off the desk machine.
+
+        None when the seat is unassigned or `any`. The dashboard and
+        `validate` use this to say which filings a hosted vendor sees.
+        """
+        model = self.model_for(seat)
+        if model is None or model == ANY_MODEL:
+            return None
+        spec = self.models.get(model)
+        return None if spec is None else not spec.is_local
+
+    def local_models(self) -> tuple[str, ...]:
+        return tuple(m for m, spec in self.models.items() if spec.is_local)
+
+    def adversary_pool(self) -> tuple[str, ...]:
+        jev = self.seats.get("Jev")
+        return jev.pool if jev else ()
 
     def model_for(self, seat: str) -> str | None:
         found = self._seat(seat)
@@ -151,6 +182,22 @@ class Roster:
                 "roster: Jev is pinned to one model. The adversary must be whichever "
                 "model did not write the ticket, or the rule cannot hold"
             )
+        if jev is not None and self.adversary_pool_needs_local:
+            local = [m for m in jev.pool if m in self.models and self.models[m].is_local]
+            if not local:
+                out.append(
+                    "roster: Jev's pool has no local model — every frontier-authored "
+                    "ticket would have to leave the box to be challenged"
+                )
+        for seat, assignment in self.seats.items():
+            for member in assignment.pool:
+                if member not in self.models:
+                    out.append(f"roster: seats.{seat}.pool names undeclared model {member!r}")
+            if assignment.fallback and assignment.fallback not in self.models:
+                out.append(
+                    f"roster: seats.{seat}.fallback names undeclared model "
+                    f"{assignment.fallback!r}"
+                )
         return out
 
 
@@ -174,10 +221,16 @@ def parse_roster(doc: Mapping[str, Any], *, where: str = "roster") -> Roster:
         if not isinstance(spec, dict):
             extra.append(f"models.{model_id}: expected a mapping")
             continue
+        hosting = str(spec.get("hosting", "api")).strip().lower()
+        if hosting not in HOSTINGS:
+            extra.append(f"models.{model_id}: hosting {hosting!r} not one of {list(HOSTINGS)}")
+            continue
         models[str(model_id).lower()] = ModelSpec(
             id=str(model_id).lower(),
             vendor=str(spec.get("vendor", "")),
-            strengths=str(spec.get("strengths", "")),
+            strengths=str(spec.get("strengths", "")).strip(),
+            hosting=hosting,
+            license=str(spec.get("license", "")),
         )
 
     seats: dict[str, SeatAssignment] = {}
@@ -195,7 +248,14 @@ def parse_roster(doc: Mapping[str, Any], *, where: str = "roster") -> Roster:
                 "it is a second vote"
             )
             continue
-        seats[str(seat)] = SeatAssignment(seat=str(seat), model=model, why=str(spec["why"]).strip())
+        pool = tuple(str(m).strip().lower() for m in (spec.get("pool") or ()))
+        seats[str(seat)] = SeatAssignment(
+            seat=str(seat),
+            model=model,
+            why=str(spec["why"]).strip(),
+            pool=pool,
+            fallback=str(spec.get("fallback", "")).strip().lower(),
+        )
 
     rules = doc.get("rules") or {}
     roster = Roster(
@@ -203,6 +263,7 @@ def parse_roster(doc: Mapping[str, Any], *, where: str = "roster") -> Roster:
         models=models,
         seats=seats,
         adversary_must_differ=bool(rules.get("adversary_must_differ", True)),
+        adversary_pool_needs_local=bool(rules.get("adversary_pool_needs_local", True)),
         score_by_model=bool(rules.get("score_by_model", True)),
         max_research_seats_per_model=int(rules.get("max_research_seats_per_model", 6)),
         raw=doc,

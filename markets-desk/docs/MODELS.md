@@ -24,16 +24,17 @@ behind it is a second vote.
 
 | Seat | Model | The capability |
 |---|---|---|
-| Wire, Ledger | Gemini | Search grounding for calendar and event→instrument; long context for filings and transcripts |
+| Wire | Gemini | Search grounding for calendar and event→instrument |
+| Ledger | Gemini (fallback GLM-5.3-Flash) | 1M context for filings; the frontier still leads annual-report QA |
 | Grok | Grok | Live X. Nothing else on the desk can see it |
-| Chain, Odds, Pulse, Shadow, Rails, CoS | Claude | Wrote the contracts and the tests; the seat that edits caps should be the one that can break the build |
+| Odds, Rails | Claude | Rules-lawyering resolution text; wrote the engine and its tests |
+| Chain, Pulse, Shadow, CoS | **Qwen3.6-27B, local** | Adapter-fed seats whose YAML the contract checks; the book never leaves the box |
 | Codex | Codex | Execution path, by doctrine |
-| **Jev** | **any** | **Whichever model did not write the ticket** |
+| **Jev** | **pool: gpt-oss-120b first, local** | **Whichever model did not write the ticket** — a different vendor from every frontier proposer by construction |
 
-Claude holds six research seats, which is the cap. That is not a vote of
-confidence; it is that four of those seats are adapter-fed and need a careful
-reader more than a special capability, and splitting them across vendors for
-its own sake buys nothing. The ledger will say whether that holds.
+Four research seats and the default adversary run on the desk machine. What
+open weights buy — privacy, vendor-independence, cost — and what they do not
+buy is in `docs/OPEN-WEIGHT.md`. The ledger will say whether the split holds.
 
 ## The three rules, enforced
 

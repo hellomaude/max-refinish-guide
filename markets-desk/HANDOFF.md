@@ -29,7 +29,7 @@ touching the network. CI runs the suite, validates the shipped book, and stamps 
 | `tests/test_boundary.py` | Fails the build on order-placing machinery, signing material, PUT/PATCH/DELETE, POST outside `adapters/base.py`, Jev originating a ticket, or a shipped policy that arms a venue |
 | `docs/` | `SEATS.md` (contracts per seat), `RISK-MODEL.md`, `ARCHITECTURE.md`, `CONNECTORS.md`, `MIGRATION.md`, `EVIDENCE.md` (literature check), `PRIOR-ART.md` |
 | `codex-feed/HANDOFF-CODEX.md` · `BRIEF-GROK.md` | Standing instructions for the execution agent and the social seat |
-| `codex-feed/ROSTER.yaml` · `desk/roster.py` | Which model holds which seat and why; the adversary-must-differ rule; `score` by model. See `docs/MODELS.md` |
+| `codex-feed/ROSTER.yaml` · `desk/roster.py` | Which model holds which seat and why; hosting (local vs api); the adversary-must-differ rule; `score` by model. See `docs/MODELS.md`, `docs/OPEN-WEIGHT.md` |
 | `tickets/` · `challenges/` · `assignments/` | Five live tickets, one Jev challenge, one machine-issued Grok assignment |
 
 **Board as of this handoff** (`desk stamp --now 2026-09-22T06:30-07:00`):
@@ -161,7 +161,11 @@ seat and why; `docs/MODELS.md` says why it is not a vote. Two things to do:
 
 1. Stand up Gemini on Wire and Ledger — search-grounded calendar reads and
    long-context filings. It files reports in the same schema as everyone.
-2. Declare `model:` on every new ticket and challenge. The adversary rule
+2. Serve the local models: Qwen3.6-27B (Chain, Pulse, Shadow, CoS) and
+   gpt-oss-120b (the default adversary) behind an OpenAI-compatible endpoint
+   — vLLM or Ollama/MLX. `docs/OPEN-WEIGHT.md` has sizes and the reasoning.
+   `desk validate` prints which seats are on the box; it should say four.
+3. Declare `model:` on every new ticket and challenge. The adversary rule
    (a challenge from the proposer's own model is self-review and does not
    count) bites exactly on declarations and only by inference without them.
    WKND-002's challenge carries no `model`; the next revision should.
