@@ -1,0 +1,57 @@
+# Revision 2026-09-20T18:45 PT. Revision 1 set two mind-change conditions.
+# One was researched and partly settled against me; one turned out to be
+# unanswerable as written. Restated below. The verdict does not move, because
+# the objection that mattered was never about the legislation.
+schema_version: 2
+ticket_id: WKND-002
+challenger: Jev
+challenged_at: 2026-09-20T18:45:00-07:00
+
+verdict: contest
+confidence_adjustment: -1
+
+strongest_counter: >-
+  The legislative read is right — more right than revision 1 of this challenge
+  allowed — and the trade is still bad. I conceded the must-pass-vehicle tail:
+  the obvious vehicle is itself stalled, the FY2027 NDAA having failed cloture
+  in July, and the lame duck is already spoken for by funding. Fine. That makes
+  Yes cheaper than 7.55c, not the position better. What survives untouched is
+  the trade: you risk 92.5 to make 7.5, so the position needs better than 92.5%
+  accuracy to break even, and the thesis reaches its 97-98% off a chain of
+  judgements about floor time and whip counts rather than off anything
+  observable. On a book this thin the claimed five cents of edge is partly
+  spread and fees, and the ticket's own exit rule — "exit, do not average" — is
+  unexecutable: you would be selling into the same headline that just repriced
+  you, at 60c, not at 85c. This is short-vol carry. The desk has no sizing
+  regime for short vol, and dropping one into a directional book under a
+  conviction ladder built for stops is how a small line becomes the only loss
+  that mattered this quarter. Size it as carry or do not size it.
+
+what_would_change_my_mind: >-
+  Revision 1 asked for a base rate of 119th-Congress bills that failed cloture
+  and were later enacted via a year-end vehicle. That number is not published
+  in any source the desk can reach, so I withdraw it rather than let an
+  unanswerable condition sit here looking rigorous. One condition remains and
+  it is checkable on the box: CLOB depth on the No side. More than $5k resting
+  within two cents of the midpoint means the exit rule is real and I concede to
+  zero adjustment. Less than that and the objection stands however dead the
+  bill is, because the problem was always the exit and not the thesis.
+
+missed_invalidation: >-
+  Carried from revision 1 and now in the ticket: No drifting to 97-98c on
+  nothing at all, where the remaining carry stops compensating the tail and the
+  position should be closed for being finished rather than for being wrong.
+
+evidence_disputed:
+  - yes_price
+
+notes: >-
+  Two things I am explicitly not disputing. The cloture facts are well sourced
+  and the corrected 49-50 tally does not change anything I argued. And the
+  September 17 SEC exemption genuinely does weaken the revival case, since it
+  removes the industry's urgency about floor time — I am counting that against
+  my own tail argument, not ignoring it.
+
+  What I want on the record: the ticket reasons its way to a correct conclusion
+  about the legislation and then treats that as a conclusion about the trade.
+  Those are different claims and only the first one is well evidenced.

@@ -1,0 +1,55 @@
+# Any seat. Copy to reports/<date>-<time>-<seat>.report.yaml
+#
+# This is how a seat hands work to the desk — and how a researcher that is not
+# this process becomes a seat. Grok Bot joins by writing files in this schema,
+# not by exposing an API.
+
+schema_version: 2
+seat: Chain
+produced_at: 2026-09-21T06:30:00-07:00
+
+# clear   — you have a read the desk can act on; requires evidence
+# mixed   — the evidence points both ways, and you say so
+# no_read — you could not form one; requires `unavailable` or `notes`
+read: clear
+
+headline: >-
+  One sentence the desk can act on. Not a status word — "funding calm" is a
+  read, "checked" is not.
+
+covers: [BTC, ETH]
+
+# Social seats only (see codex-feed/BRIEF-GROK.md). How well-known the idea
+# already is: differentiated | consensus | crowded. You may only rate names
+# listed in `covers`.
+# crowding:
+#   BTC: differentiated
+
+# Sources you deliberately excluded — the desk bans pumper accounts and should
+# see what you filtered, not just the residue.
+# excluded_sources:
+#   - "@somepumper (paid promotion pattern)"
+
+evidence:
+  # `as_of` is when the fact was true, not when you fetched it.
+  #
+  # Hard kinds originate a thesis: price, filing, funding_oi, liquidations,
+  # options_greeks, macro_print, order_book, etf_flow, legislative.
+  # Soft kinds corroborate only: social, news, sentiment. A ticket asking for
+  # size with nothing hard behind it is refused as soft_evidence_only.
+  - key: BTC_funding_apr
+    kind: funding_oi
+    value: 0.1095
+    source: Hyperliquid /info (annualised from hourly)
+    as_of: 2026-09-21T06:25:00-07:00
+    url: https://api.hyperliquid.xyz/info
+
+unavailable:
+  # Sources you could not reach. Say so — a gap the desk knows about is not a
+  # gap. Silence is what hurts.
+  - coinglass (no key)
+  - binance_futures (geo-blocked)
+
+notes: >-
+  Anything the desk needs that is not the read: a convention, a caveat, a
+  dependency on another seat.

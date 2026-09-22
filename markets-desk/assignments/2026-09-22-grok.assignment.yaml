@@ -1,0 +1,61 @@
+# Issued by `desk assign`. Do not edit by hand — regenerate it.
+schema_version: 1
+seat: Grok
+issued_at: 2026-09-22T13:30:00+0000
+note: >-
+  First machine-issued work order. Answer the crowding asks in order; the crypto-policy legs share one 1.50% ceiling, so a consensus call on any of them takes the whole cluster down.
+tasks:
+  - task_id: WKND-005:crowding
+    kind: crowding
+    subject: BTC
+    ticket_id: WKND-005
+    why: long BTC under crypto_policy_beta (shared cap 1.50%, up to 1.50% at stake here) — is it already known?
+    at_stake_pct: 1.50
+    max_age_hours: 48
+    theme: crypto_policy_beta
+    answer_by: 2026-10-02T13:30:00+0000
+  - task_id: WKND-001A:crowding
+    kind: crowding
+    subject: COIN
+    ticket_id: WKND-001A
+    why: long COIN under crypto_policy_beta (shared cap 1.50%, up to 1.50% at stake here) — is it already known?
+    at_stake_pct: 1.50
+    max_age_hours: 48
+    theme: crypto_policy_beta
+    answer_by: 2026-09-22T20:30:00+0000
+  - task_id: WKND-001B:crowding
+    kind: crowding
+    subject: HOOD
+    ticket_id: WKND-001B
+    why: long HOOD under crypto_policy_beta (shared cap 1.50%, up to 1.50% at stake here) — is it already known?
+    at_stake_pct: 1.50
+    max_age_hours: 48
+    theme: crypto_policy_beta
+    answer_by: 2026-09-22T20:30:00+0000
+  - task_id: WKND-004:crowding
+    kind: crowding
+    subject: SBLK
+    ticket_id: WKND-004
+    why: long SBLK under insider_shipping (shared cap 0.75%, up to 0.75% at stake here) — is it already known?
+    at_stake_pct: 0.75
+    max_age_hours: 48
+    theme: insider_shipping
+    answer_by: 2026-10-02T13:30:00+0000
+  - task_id: WKND-002:catalyst
+    kind: catalyst
+    subject: "Absence of a catalyst is the thesis: each week without floor action decays Yes toward zero"
+    ticket_id: WKND-002
+    why: resolves 2027-01-01 and carries clarity-act-signed-2026; is anyone discussing it?
+    at_stake_pct: 0.50
+    max_age_hours: 48
+    theme: crypto_policy_beta
+    answer_by: 2027-01-01T05:00:00+0000
+  - task_id: WKND-002:crowding
+    kind: crowding
+    subject: clarity-act-signed-2026
+    ticket_id: WKND-002
+    why: long clarity-act-signed-2026 under crypto_policy_beta (shared cap 1.50%, up to 0.50% at stake here) — is it already known?
+    at_stake_pct: 0.50
+    max_age_hours: 48
+    theme: crypto_policy_beta
+    answer_by: 2027-01-01T05:00:00+0000

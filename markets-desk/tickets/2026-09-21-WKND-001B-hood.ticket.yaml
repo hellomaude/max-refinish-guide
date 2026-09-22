@@ -1,0 +1,57 @@
+# STUB. Transcribed from the weekend pack's summary row, not written fresh.
+# The thesis below states what the row said and nothing more; the originating
+# seat owes the real reasoning before this carries size.
+schema_version: 2
+id: WKND-001B
+created_at: 2026-09-21T06:00:00-07:00
+source_seats: [Chain, Wire]
+
+instrument:
+  kind: equity
+  symbol: HOOD
+  venue: equity
+
+direction: long
+theme: crypto_policy_beta
+
+thesis: >-
+  STUB, awaiting the originating seat. The weekend pack carried this as
+  "COIN/HOOD continuation vs fade" with no written thesis beyond the pairing.
+  What the desk actually has is a conditional: continuation is live only if
+  Chain's Monday re-pull shows BTC HOLDING the ~$81.3k reclaim into the cash
+  open. SOFT at $80-81.3k or LOST below $80k inverts this to the fade leg.
+  Nobody should size this until that condition is observed and the reasoning
+  is written down.
+
+catalyst: Monday cash open tape, after Chain's 06:30 PT re-pull.
+catalyst_at: 2026-09-21T06:30:00-07:00
+
+invalidation: >-
+  BTC loses $80k, or HOOD fails to hold the prior session's reclaim level on a
+  closing basis. Either one retires the continuation leg outright rather than
+  weakening it.
+
+horizon: intraday
+size_hint_pct: 0.0
+confidence: 1
+
+evidence: []
+
+sources:
+  - tickets/2026-09-20-weekend.md
+  - tickets/2026-09-20-chain-tag.md
+
+rails_check: pending
+max_gate: true
+
+notes: >-
+  Rails' weekend stamp set continuation at <=1.0% COMBINED across COIN and
+  HOOD, with MSTR and MARA at zero. That combined cap is tighter than the
+  crypto_policy_beta theme cap and is a Monday re-stamp decision, so it is
+  deliberately NOT baked into MODE.yaml here — Rails sets it when it re-stamps.
+  If it becomes standing policy, express it as its own theme containing only
+  COIN and HOOD.
+
+  Equity venue is disabled in MODE.yaml, so this ticket cannot become an order
+  sheet regardless of what the tape does. It is research until Max names a
+  venue.

@@ -1,0 +1,55 @@
+# STUB. Transcribed from the weekend pack's summary row.
+schema_version: 2
+id: WKND-004
+created_at: 2026-09-21T06:00:00-07:00
+source_seats: [Shadow]
+
+instrument:
+  kind: equity
+  symbol: SBLK
+  venue: equity
+
+direction: long
+theme: insider_shipping
+
+thesis: >-
+  STUB, awaiting Shadow. The weekend pack asserted a Form 4 insider-buying
+  cluster in SBLK and Rails held it at PENDING explicitly because the cluster
+  had only been read from an aggregator's summary, not from the filings. That
+  caution is the whole ticket: a cluster is several DIFFERENT insiders buying
+  on the open market, and an aggregator counting one director's four filings
+  as four signals would produce exactly this appearance.
+
+catalyst: >-
+  Confirmation or collapse of the cluster once the ownership documents are
+  read. There is no market catalyst here — the catalyst is the desk finding
+  out whether its own claim is true.
+
+invalidation: >-
+  Fewer than two distinct reporting owners buying on the open market
+  (transaction code P) inside the lookback window, or the buying turning out
+  to be grants and option exercises (codes A and M) rather than purchases.
+
+horizon: swing
+size_hint_pct: 0.0
+confidence: 1
+
+evidence: []
+
+sources:
+  - tickets/20260919-1750-shadow-open.md
+
+rails_check: pending
+max_gate: true
+
+notes: >-
+  Shadow can now settle this mechanically:
+
+      python -m desk fetch Shadow --cik <SBLK_CIK> --ticker SBLK
+
+  The CIK is deliberately not filled in here — I did not want to guess it into
+  a ticket. Shadow resolves it from EDGAR company search first.
+
+  The adapter counts distinct owners rather than filings and reports open-market
+  buys separately from grants, which is the exact distinction Rails was holding
+  out for. Rails capped this at 0.75% via the insider_shipping one-member theme.

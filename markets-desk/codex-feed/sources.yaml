@@ -1,0 +1,187 @@
+# The data layer, declared.
+#
+# Every upstream the desk reads from, which seat owns it, what it costs, and
+# what to fall back to when it is dark. `python -m desk preflight` probes this
+# file and reports state per source, so "CoinGlass key missing" and
+# "Binance geo-blocked" stop being lines a human re-discovers on a Monday.
+#
+# `url` is a cheap liveness endpoint, not the endpoint the seat actually reads.
+# Keep it small — the prober runs it every session.
+#
+# A note on MCP connectors: none of the seats below are served by a connector
+# in the Claude directory. Polymarket, Kalshi, Unusual Whales, CoinGlass,
+# Alpaca, Kraken and FRED have no MCP server as of 2026-09-20, so Odds, Chain,
+# Pulse and Shadow run on direct HTTP. Connectors cover Ledger and Wire only.
+
+sources:
+  # --- Odds: prediction markets ---------------------------------------
+  - id: polymarket_gamma
+    seat: Odds
+    kind: prediction_market
+    url: https://gamma-api.polymarket.com/markets?limit=1
+    cost: free
+    note: >-
+      Read-only market catalogue: events, slugs, resolution text, last trade.
+      Unauthenticated. ~60 req/min. This is the PublicClient path — never
+      SecureClient, never POST /order.
+    fallbacks: [polymarket_clob]
+
+  - id: polymarket_clob
+    seat: Odds
+    kind: prediction_market
+    url: https://clob.polymarket.com/ok
+    cost: free
+    note: >-
+      Order book depth and midpoint by outcome token id. Read endpoints are
+      public; order management needs a signed wallet the desk does not have
+      and must not acquire. ~100 req/min.
+
+  # --- Chain: crypto derivatives and flows ----------------------------
+  - id: hyperliquid_info
+    seat: Chain
+    kind: funding_oi
+    url: https://api.hyperliquid.xyz/info
+    expect_status: [200, 405, 422]
+    cost: free
+    note: >-
+      POST /info returns metaAndAssetCtxs — mark price, funding, open interest
+      per perp, no auth. This is the primary funding/OI source precisely
+      because it has no geo gate, unlike the venues the box cannot reach.
+    fallbacks: [coinalyze, coinglass]
+
+  - id: coinalyze
+    seat: Chain
+    kind: funding_oi
+    url: https://api.coinalyze.net/v1/exchanges
+    auth_env: COINALYZE_API_KEY
+    cost: free_tier
+    note: Aggregated funding/OI/liquidations across venues. Free key, generous limits.
+    fallbacks: [coinglass]
+
+  - id: coinglass
+    seat: Chain
+    kind: liquidations
+    url: https://open-api-v4.coinglass.com/api/futures/supported-coins
+    auth_env: COINGLASS_API_KEY
+    cost: paid
+    note: >-
+      Liquidation heatmaps and long/short ratios. Key was never set on the box,
+      which is why the Monday checklist kept carrying it as an open item.
+      Leave unset and let the prober report no_auth rather than pretending.
+
+  - id: binance_futures
+    seat: Chain
+    kind: funding_oi
+    url: https://fapi.binance.com/fapi/v1/ping
+    cost: free
+    geo_risk: true
+    note: Geo-blocked from the box. Registered so the prober names it, not to rely on.
+    fallbacks: [hyperliquid_info]
+
+  - id: bybit_v5
+    seat: Chain
+    kind: funding_oi
+    url: https://api.bybit.com/v5/market/time
+    cost: free
+    geo_risk: true
+    note: Geo-blocked from the box. Same reason as Binance.
+    fallbacks: [hyperliquid_info]
+
+  - id: deribit_public
+    seat: Chain
+    kind: options_greeks
+    url: https://www.deribit.com/api/v2/public/get_time
+    cost: free
+    note: >-
+      DVOL and crypto options surface. Public methods need no key, but Deribit
+      rate-limits unauthenticated callers harder and will ban an IP that
+      hammers it — keep the poll interval honest.
+
+  - id: farside_etf_flow
+    seat: Chain
+    kind: etf_flow
+    url: https://farside.co.uk/btc/
+    cost: free
+    note: >-
+      Daily US spot BTC/ETH ETF flows in US$m. HTML, not JSON — parse it, and
+      never cite a weekend read as confirmation of a weekday flow.
+    fallbacks: [sosovalue]
+
+  - id: sosovalue
+    seat: Chain
+    kind: etf_flow
+    url: https://sosovalue.com/
+    cost: free
+    note: Per-fund daily flows and cumulative totals; cross-check against Farside.
+
+  - id: kraken_public
+    seat: Chain
+    kind: price
+    url: https://api.kraken.com/0/public/SystemStatus
+    cost: free
+    note: Spot reference pricing. Paper and intel only — no live orders.
+
+  # --- Pulse: options positioning -------------------------------------
+  - id: cboe_delayed_chain
+    seat: Pulse
+    kind: options_greeks
+    url: https://cdn.cboe.com/api/global/delayed_quotes/options/_SPX.json
+    cost: free
+    note: >-
+      Full delayed chain (~15 min) with open interest and greeks per strike.
+      Compute GEX from this rather than trusting a third-party dashboard whose
+      as_of you cannot see. The frozen-at-Friday's-OpEx failure is only
+      detectable when you own the timestamp.
+    fallbacks: [alpha_vantage_options]
+
+  - id: alpha_vantage_options
+    seat: Pulse
+    kind: options_greeks
+    url: https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=SPY
+    auth_env: ALPHAVANTAGE_API_KEY
+    cost: free_tier
+    note: Historical and realtime options chains with greeks. Also available as an MCP connector.
+
+  # --- Shadow: disclosures --------------------------------------------
+  - id: sec_submissions
+    seat: Shadow
+    kind: filing
+    url: https://data.sec.gov/submissions/CIK0000320193.json
+    cost: free
+    note: >-
+      Filing history per CIK. 10 req/s ceiling across all your machines, and a
+      User-Agent naming a real contact is mandatory — a default library UA
+      gets 403 and then an IP block. Set DESK_USER_AGENT.
+
+  - id: sec_fulltext
+    seat: Shadow
+    kind: filing
+    url: https://efts.sec.gov/LATEST/search-index?q=test
+    expect_status: [200, 400]
+    cost: free
+    note: Full-text search across filings; the path to Form 4 clusters and 13F changes.
+
+  - id: sec_companyfacts
+    seat: Ledger
+    kind: filing
+    url: https://data.sec.gov/api/xbrl/companyfacts/CIK0000320193.json
+    cost: free
+    note: XBRL facts straight from the filing — the tiebreak when vendors disagree.
+
+  # --- Ledger / Wire: macro and equities ------------------------------
+  - id: fred
+    seat: Ledger
+    kind: macro_print
+    url: https://api.stlouisfed.org/fred/series?series_id=DGS10&file_type=json
+    auth_env: FRED_API_KEY
+    cost: free
+    note: >-
+      Rates, PMI, CPI, the whole macro spine. Free key, no MCP connector
+      exists, and nothing in the vendor stack replaces it.
+
+  - id: treasury_yield_curve
+    seat: Ledger
+    kind: macro_print
+    url: https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v2/accounting/od/avg_interest_rates?page[size]=1
+    cost: free
+    note: Primary-source yield and debt data; no key.

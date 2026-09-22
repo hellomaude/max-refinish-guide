@@ -1,0 +1,137 @@
+# Who sits where, and why. Read by `desk/roster.py`; `desk validate` refuses a
+# book whose filings name a model this file does not.
+#
+# The organising rule: a model is assigned to a seat for a capability the desk
+# would otherwise lack, never as a second vote. Two models agreeing is not
+# evidence — their errors correlate through shared training data and shared
+# sources. Diversity of *information* is what the desk buys; diversity of
+# *models on the same information* is theatre.
+#
+# `hosting` says whether the book leaves the box when that model reads it.
+# `local` models run on the desk machine; nothing they see is sent anywhere.
+# `api` models are called over the network, open-weight or not.
+# `web: true` means a chat-window session of that model is an acceptable way
+# to hold the seat — paste `prompts/*.md`, paste the output into the file. For
+# privacy it is the same as `api`: what you paste leaves the box.
+#
+# Model ids are families, not versions. Pin versions on the box, not here.
+
+schema_version: 1
+updated_at: 2026-09-22T08:00:00-07:00
+
+models:
+  # ---- frontier, hosted ----
+  claude:
+    web: true
+    vendor: Anthropic
+    hosting: api
+    license: proprietary
+    strengths: long-context synthesis; careful with contracts and refusals; wrote the plumbing and its tests
+  codex:
+    web: true
+    vendor: OpenAI
+    hosting: api
+    license: proprietary
+    strengths: execution path; order-sheet formatting; owns the ticket -> sheet contract
+  grok:
+    web: true
+    vendor: xAI
+    hosting: api
+    license: proprietary
+    strengths: the only model with live X access; real-time attention
+  gemini:
+    web: true
+    vendor: Google
+    hosting: api
+    license: proprietary
+    strengths: search-grounded event and calendar reads; 1M context for filings and transcripts
+
+  # ---- open-weight, local (the book never leaves the box) ----
+  gpt-oss-120b:
+    vendor: OpenAI (open weights)
+    hosting: local
+    license: Apache-2.0
+    strengths: >-
+      Reasoning model with configurable effort; fits in ~80 GB; the best
+      reasoning-per-gigabyte with a clean licence. Runs the adversary at
+      effort=high on the desk box.
+  qwen3.6-27b:
+    vendor: Alibaba (open weights)
+    hosting: local
+    license: Apache-2.0
+    strengths: >-
+      Dense 27B on one GPU; 256K context; strong instruction-following and
+      structured output. The workhorse for adapter-fed seats whose output is
+      YAML the contract will check anyway.
+
+  # ---- open-weight, hosted (cheap and vendor-diverse; the book still leaves) ----
+  deepseek-v4.1-flash:
+    vendor: DeepSeek (open weights)
+    hosting: api
+    license: MIT
+    strengths: 552B MoE, 8-16B active, 1M context; frontier-class tool use at a fraction of the cost
+  glm-5.3-flash:
+    vendor: Zhipu (open weights)
+    hosting: api
+    license: MIT
+    strengths: 320B / 18B active; strong on annual-report comprehension for an open model
+
+seats:
+  Wire:
+    model: gemini
+    why: search grounding is the capability; open models have no native search and would need a tool bolted on
+  Ledger:
+    model: gemini
+    fallback: glm-5.3-flash
+    why: >-
+      Annual-report QA is where the frontier still leads (Opus 4.6 88.4% on
+      Financial Touchstone; best open-weight third). Gemini for 1M context and
+      grounding; GLM-5.3-Flash as the cheap open fallback.
+  Chain:
+    model: qwen3.6-27b
+    why: funding and OI come from the adapter; the seat writes YAML the contract checks. No frontier needed, and the book stays on the box
+  Odds:
+    model: claude
+    why: rules-lawyering resolution text decided WKND-002; a reading-comprehension seat keeps a frontier reader
+  Pulse:
+    model: qwen3.6-27b
+    why: the adapter computes GEX; the seat's job is refusing an untimestamped chain and filing regime, not direction
+  Shadow:
+    model: qwen3.6-27b
+    why: reading ownership XML the adapter already parsed; the routine screen is code. Local, so filings under review never leave
+  Grok:
+    model: grok
+    why: live X. No open model can see it; there is no substitute
+  Rails:
+    model: claude
+    why: owns MODE.yaml and the engine; the seat that edits caps must be the one that wrote the tests for them
+  CoS:
+    model: qwen3.6-27b
+    why: compression and sequencing of the pack; well inside a 27B's reach, and the pack is the most sensitive document on the desk
+  Codex:
+    model: codex
+    why: execution path, by doctrine
+  Jev:
+    model: any
+    pool: [gpt-oss-120b, qwen3.6-27b, gemini, claude]
+    why: >-
+      The adversary is whichever model in the pool did NOT write the ticket.
+      Local open-weight models lead the pool on purpose: they are a different
+      vendor from every frontier proposer by construction, and a challenge
+      argued on the box never exposes the thesis. gpt-oss-120b at effort=high
+      is the default challenger; the rest are there so a local ticket
+      (Chain/Pulse/Shadow/CoS on Qwen) still gets a non-Qwen adversary.
+
+rules:
+  # A challenge whose model matches the ticket's model does not count.
+  adversary_must_differ: true
+
+  # The adversary pool must include at least one local model, so every
+  # frontier-authored ticket can be challenged without leaving the box.
+  adversary_pool_needs_local: true
+
+  # Seats that share a model share a failure mode; score by model too.
+  score_by_model: true
+
+  # No model may hold more than this many research seats.
+  max_research_seats_per_model: 6

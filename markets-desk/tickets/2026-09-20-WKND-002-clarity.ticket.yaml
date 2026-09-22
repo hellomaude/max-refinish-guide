@@ -1,0 +1,113 @@
+# Supersedes the WKND-002 in the weekend pack. Odds' rules-lawyering question
+# is answered, and the answer retires the Yes side.
+#
+# Revision 2026-09-20T18:40 PT: the vote tally in revision 1 was wrong (it read
+# 50-49). The Senate record is 49-50, Roll Call 234. Corrected below, and the
+# two facts that matter more than the tally are now carried as evidence:
+# a pending motion to reconsider, and the SEC acting administratively on Sep 17.
+schema_version: 2
+id: WKND-002
+created_at: 2026-09-20T09:30:00-07:00
+source_seats: [Odds, Wire]
+
+instrument:
+  kind: prediction_market
+  venue: polymarket
+  symbol: clarity-act-signed-2026
+  outcome: "No"
+
+direction: long
+theme: crypto_policy_beta
+
+thesis: >-
+  The weekend pack carried this as a Yes at ~7.55c. That side is not mispriced,
+  it is nearly dead. Cloture on the motion to proceed to H.R.3633 failed 49-50
+  on 2026-09-15 (Roll Call 234), eleven short of sixty, and every one of the
+  seven Democrats who negotiated the bill voted no — so a revival rebuilds the
+  crossover bloc from zero rather than converting one or two holdouts. The
+  calendar then closes: recess from October 5, and a November 5 to December 18
+  lame duck already consumed by government funding. Meanwhile the SEC moved
+  administratively on September 17, which removes much of the industry's reason
+  to spend scarce floor time on the statute. Fair value on Yes is low single
+  digits against 7.55c offered. The edge, if any, is on No as short-dated
+  carry, not on Yes as a lottery ticket.
+
+catalyst: >-
+  Absence of a catalyst is the thesis: each week without floor action decays
+  Yes toward zero. The live procedural hook is Senator Tillis's motion to
+  reconsider, which leaves the bill on the calendar and lets Thune re-run the
+  vote the day sixty votes exist.
+catalyst_at: 2026-12-31T21:00:00-08:00
+
+invalidation: >-
+  Thune calling up the motion to reconsider with a whip count in hand, or the
+  text attached to the year-end funding vehicle. Either reprices No violently
+  and the carry is not worth defending — exit, do not average. Second, slower
+  invalidation per Jev: No drifting to 97-98c, at which point the remaining
+  premium no longer compensates the tail and the position is finished rather
+  than wrong.
+
+horizon: position
+size_hint_pct: 0.5
+confidence: 3
+
+entry: 0.925
+defined_risk: true
+
+evidence:
+  - key: senate_cloture_vote
+    kind: legislative
+    value: "rejected 49-50 on the motion to proceed, Roll Call 234, 60 required"
+    source: Senate roll call record 119-2-234, via CNBC / National Law Review
+    as_of: 2026-09-15T14:30:00-07:00
+    url: https://www.senate.gov/legislative/LIS/roll_call_votes/vote1192/vote_119_2_00234.htm
+  - key: motion_to_reconsider
+    kind: legislative
+    value: "Tillis entered a motion to reconsider; bill stays on the calendar"
+    source: Senate floor record, 2026-09-15
+    as_of: 2026-09-15T14:45:00-07:00
+  - key: negotiator_defection
+    kind: legislative
+    value: "all 7 Democratic negotiators voted no; Coons not voting"
+    source: CNBC, 2026-09-15
+    as_of: 2026-09-15T14:30:00-07:00
+    url: https://www.cnbc.com/2026/09/15/senate-cloture-vote-on-clarity-act-fails-dealing-regulatory-setback-to-crypto-industry.html
+  - key: floor_calendar
+    kind: legislative
+    value: "recess from Oct 5; lame duck Nov 5 - Dec 18 dominated by funding"
+    source: Punchbowl / news.bitcoin.com legislative calendar reporting
+    as_of: 2026-09-18T09:00:00-07:00
+  - key: sec_administrative_route
+    kind: legislative
+    value: >-
+      SEC issued a five-year Innovation Exemption for onchain trading of
+      tokenized stocks on 2026-09-17; CFTC issued a developer no-action
+      position. Does NOT resolve this market Yes.
+    source: SEC / CFTC releases, 2026-09-17
+    as_of: 2026-09-17T13:00:00-07:00
+  - key: yes_price
+    kind: price
+    value: 0.0755
+    source: Polymarket Gamma (weekend pack, NOT re-verified)
+    as_of: 2026-09-20T07:00:00-07:00
+
+sources:
+  - https://www.congress.gov/bill/119th-congress/house-bill/3633/all-actions
+  - https://www.senate.gov/legislative/LIS/roll_call_votes/vote1192/vote_119_2_00234.htm
+  - https://www.cnbc.com/2026/09/15/senate-cloture-vote-on-clarity-act-fails-dealing-regulatory-setback-to-crypto-industry.html
+  - https://natlawreview.com/article/senate-fails-advance-clarity-act
+
+rails_check: pending
+max_gate: true
+
+notes: >-
+  Odds still owes two things before this carries size. First, the resolution
+  text: confirm the exact wording on the Gamma record, not the market title —
+  the September 17 SEC exemption is the live test of that distinction, because
+  an exemption is not a signed statute and must not resolve this Yes. Second,
+  the price: 7.55c is a weekend read that has not been re-verified, and the
+  whole thesis is a comparison against it.
+
+  Jev's surviving objection is about the trade, not the legislation: this is
+  short-vol carry on a thin book and the desk has no sizing regime for short
+  vol. See challenges/2026-09-20-WKND-002.challenge.yaml.

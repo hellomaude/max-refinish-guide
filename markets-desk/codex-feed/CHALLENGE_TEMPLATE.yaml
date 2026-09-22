@@ -1,0 +1,47 @@
+# Jev only. Copy to challenges/<date>-<TICKET-ID>.challenge.yaml.
+#
+# The job is not to register doubt. It is to build the other side's best
+# argument and say what would settle it. A challenge that costs the ticket
+# nothing is a note, and `validate` will refuse it.
+
+schema_version: 2
+ticket_id: WKND-000
+challenger: Jev
+challenged_at: 2026-09-21T07:15:00-07:00
+# Which model argued. Must differ from the model that wrote the ticket, or
+# the challenge is self-review and does not count (ROSTER.yaml, docs/MODELS.md).
+model: gemini
+
+# contest — the thesis survives but is weaker than the author thinks
+# concede — attacked it properly and it held
+# kill    — the thesis is broken, not merely optimistic (hard FAIL at Rails)
+verdict: contest
+
+# Only subtracts or holds. The adversary may not add conviction: that would
+# make it a second proposer and reward it for being agreeable.
+#   contest -> must be non-zero
+#   concede -> must be 0
+#   kill    -> whatever you like; the ticket fails regardless
+confidence_adjustment: -1
+
+strongest_counter: >-
+  The best version of the argument against. Not "this seems risky" — the
+  specific mechanism by which the author is wrong, or the specific thing the
+  thesis asserts without evidence. Attack the reasoning, the liquidity, the
+  exit, or the sizing regime, whichever is weakest.
+
+what_would_change_my_mind: >-
+  Checkable. A number, a base rate, a depth reading, a filing. If nothing would
+  settle it, you have an opinion and the desk already has plenty.
+
+missed_invalidation: >-
+  Optional. An invalidation the author did not list — often the slow one, where
+  the position stops being worth holding without ever being wrong.
+
+evidence_disputed:
+  # Optional. Evidence keys you think are stale, misread or wrong.
+  - yes_price
+
+notes: >-
+  Optional. What you are not disputing, which is usually as useful as what you
+  are.

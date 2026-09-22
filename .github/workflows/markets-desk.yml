@@ -1,0 +1,28 @@
+name: markets-desk
+
+on:
+  push:
+    paths: ['markets-desk/**', '.github/workflows/markets-desk.yml']
+  pull_request:
+    paths: ['markets-desk/**', '.github/workflows/markets-desk.yml']
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: markets-desk
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install pyyaml
+      # The boundary suite is what keeps "research never trades" true rather
+      # than merely written down, so the build fails if it does.
+      - name: Test
+        run: python -m unittest discover -s tests -t . -v
+      - name: Validate the shipped book
+        run: python -m desk validate
+      - name: Stamp the book
+        run: python -m desk stamp --now 2026-09-21T06:30:00-07:00
