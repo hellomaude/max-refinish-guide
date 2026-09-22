@@ -1,0 +1,80 @@
+# Who sits where, and why. Read by `desk/roster.py`; `desk validate` refuses a
+# book whose filings name a model this file does not.
+#
+# The organising rule: a model is assigned to a seat for a capability the desk
+# would otherwise lack, never as a second vote. Two models agreeing is not
+# evidence — their errors correlate through shared training data and shared
+# sources. Diversity of *information* is what the desk buys; diversity of
+# *models on the same information* is theatre.
+#
+# `model` is a family, not a version. Pin versions on the box, not here.
+
+schema_version: 1
+updated_at: 2026-09-22T07:30:00-07:00
+
+models:
+  claude:
+    vendor: Anthropic
+    strengths: long-context synthesis; careful with contracts and refusals; the plumbing author
+  codex:
+    vendor: OpenAI
+    strengths: execution path; order-sheet formatting; owns the ticket -> sheet contract
+  grok:
+    vendor: xAI
+    strengths: the only model with live X access; real-time attention
+  gemini:
+    vendor: Google
+    strengths: search-grounded event and calendar reads; very long context for filings and transcripts
+
+seats:
+  Wire:
+    model: gemini
+    why: search grounding is the capability; calendar and event -> instrument mapping
+  Ledger:
+    model: gemini
+    why: 10-K/10-Q and transcript ingestion at length; FRED via the adapter
+  Chain:
+    model: claude
+    why: no unique capability needed — funding/OI comes from the adapter; assigned for consistency with Rails' freshness rules
+  Odds:
+    model: claude
+    why: rules-lawyering resolution text; the WKND-002 argument was a reading-comprehension argument
+  Pulse:
+    model: claude
+    why: the adapter computes GEX; the seat's job is refusing an untimestamped chain
+  Shadow:
+    model: claude
+    why: reading the primary ownership XML; the routine screen
+  Grok:
+    model: grok
+    why: live X. Nothing else on the desk can see it
+  Rails:
+    model: claude
+    why: owns MODE.yaml and the engine; the seat that edits caps must be the one that wrote the tests for them
+  CoS:
+    model: claude
+    why: compression and sequencing of the pack
+  Codex:
+    model: codex
+    why: execution path, by doctrine
+  Jev:
+    model: any
+    why: >-
+      The adversary is not one model. It is whichever frontier model did NOT
+      write the ticket. A challenge filed by the proposer's own model is
+      self-review and is refused — see `rules.adversary_must_differ`.
+
+rules:
+  # A challenge whose model matches the ticket's model does not count as a
+  # challenge. The ticket stays PENDING until a different model argues against
+  # it. This is the anti-correlation rule with teeth.
+  adversary_must_differ: true
+
+  # Seats that share a model share a failure mode. The ledger scores by model
+  # as well as by seat so a systematic bias in one vendor shows up as one row.
+  score_by_model: true
+
+  # No model may be assigned to more than this many of the research seats,
+  # so a single vendor outage or a single vendor's blind spot cannot dark the
+  # whole desk. Codex and Jev are excluded from the count.
+  max_research_seats_per_model: 6

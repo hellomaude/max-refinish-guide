@@ -8,6 +8,9 @@ schema_version: 2
 ticket_id: WKND-000
 challenger: Jev
 challenged_at: 2026-09-21T07:15:00-07:00
+# Which model argued. Must differ from the model that wrote the ticket, or
+# the challenge is self-review and does not count (ROSTER.yaml, docs/MODELS.md).
+model: gemini
 
 # contest — the thesis survives but is weaker than the author thinks
 # concede — attacked it properly and it held

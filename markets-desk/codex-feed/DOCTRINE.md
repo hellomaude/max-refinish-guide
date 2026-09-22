@@ -12,6 +12,12 @@ of it is now enforced by code rather than remembered.
 | Codex | Owns the trade-ticket and execution path | Fire live capital without Max's confirmation |
 | Max | Approves every capital action | — |
 
+Seats are held by several models — the roster is `ROSTER.yaml`, the reasoning
+is `docs/MODELS.md`. Each model is assigned for a capability the desk would
+otherwise lack, never as a second vote, and **the adversary must be a
+different model from the proposer**: a challenge from the ticket's own model
+is self-review and does not count.
+
 Gabriel / Rails doctrine, unchanged: **information moves, money never.**
 
 ## Hard bans

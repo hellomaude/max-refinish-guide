@@ -94,6 +94,7 @@ _SPECS = (
     FieldSpec("excluded_sources", list, required=False, item_kind=str),
     FieldSpec("unavailable", list, required=False, item_kind=str),
     FieldSpec("notes", str, required=False),
+    FieldSpec("model", str, required=False),
 )
 
 _EVIDENCE_SPECS = (

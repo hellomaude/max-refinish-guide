@@ -29,6 +29,7 @@ touching the network. CI runs the suite, validates the shipped book, and stamps 
 | `tests/test_boundary.py` | Fails the build on order-placing machinery, signing material, PUT/PATCH/DELETE, POST outside `adapters/base.py`, Jev originating a ticket, or a shipped policy that arms a venue |
 | `docs/` | `SEATS.md` (contracts per seat), `RISK-MODEL.md`, `ARCHITECTURE.md`, `CONNECTORS.md`, `MIGRATION.md`, `EVIDENCE.md` (literature check), `PRIOR-ART.md` |
 | `codex-feed/HANDOFF-CODEX.md` · `BRIEF-GROK.md` | Standing instructions for the execution agent and the social seat |
+| `codex-feed/ROSTER.yaml` · `desk/roster.py` | Which model holds which seat and why; the adversary-must-differ rule; `score` by model. See `docs/MODELS.md` |
 | `tickets/` · `challenges/` · `assignments/` | Five live tickets, one Jev challenge, one machine-issued Grok assignment |
 
 **Board as of this handoff** (`desk stamp --now 2026-09-22T06:30-07:00`):
@@ -153,7 +154,23 @@ should fail validation with the dependency named, not file nothing.
 **Done when** `validate` refuses a book whose seat dependencies are missing,
 and the test suite carries that refusal.
 
-### Phase 3 — Grok live
+### Phase 3 — The roster live
+
+The desk is several models. `codex-feed/ROSTER.yaml` says which holds which
+seat and why; `docs/MODELS.md` says why it is not a vote. Two things to do:
+
+1. Stand up Gemini on Wire and Ledger — search-grounded calendar reads and
+   long-context filings. It files reports in the same schema as everyone.
+2. Declare `model:` on every new ticket and challenge. The adversary rule
+   (a challenge from the proposer's own model is self-review and does not
+   count) bites exactly on declarations and only by inference without them.
+   WKND-002's challenge carries no `model`; the next revision should.
+
+**Done when** `validate` shows the roster line, a Gemini report has passed the
+report contract, and a challenge with a declared model has been counted by
+`stamp`.
+
+### Phase 3b — Grok live
 
 1. Paste `codex-feed/BRIEF-GROK.md` into Grok Bot as its standing instruction.
 2. Point it at `assignments/2026-09-22-grok.assignment.yaml` — or re-issue:

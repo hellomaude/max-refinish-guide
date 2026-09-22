@@ -80,6 +80,9 @@ _SPECS = (
     FieldSpec("missed_invalidation", str, required=False),
     FieldSpec("evidence_disputed", list, required=False, item_kind=str),
     FieldSpec("notes", str, required=False),
+    # Which model argued. Optional. When it matches the ticket's model the
+    # challenge is self-review and `desk/roster.py` refuses to count it.
+    FieldSpec("model", str, required=False),
 )
 
 

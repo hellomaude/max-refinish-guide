@@ -35,6 +35,7 @@ in the same factor.
 | `report.py` | The seat-report contract — how any researcher, including a fleet that is not this process, hands work to the desk |
 | `assign.py` | The desk's work order to a research seat, and the audit of what came back |
 | `coach.py` | Grade a seat's crowding calls against the ledger; emit what to change |
+| `roster.py` | Which model sits where; the adversary-must-differ rule; score by model |
 | `risk.py` | Rails. Per-ticket gates, then water-filling allocation under theme and heat caps |
 | `sources.py` | The data-source registry and the preflight prober |
 | `adapters/` | Per-seat fetchers returning `Evidence`: Polymarket (Odds), Hyperliquid (Chain), CBOE (Pulse), EDGAR (Shadow), FRED (Ledger) |

@@ -140,10 +140,22 @@ def load_outcomes(directory: str | Path, tickets: Sequence[Ticket] = ()) -> list
     return out
 
 
-def score(outcomes: Iterable[Outcome], *, dimension: str = "seat") -> list[SeatScore]:
-    """Aggregate outcomes along one dimension: seat, theme, or confidence."""
-    if dimension not in ("seat", "theme", "confidence"):
+def score(
+    outcomes: Iterable[Outcome],
+    *,
+    dimension: str = "seat",
+    seat_to_model: Mapping[str, str] | None = None,
+) -> list[SeatScore]:
+    """Aggregate outcomes along one dimension: seat, theme, confidence, or model.
+
+    `model` needs `seat_to_model` from the roster. Seats that share a model
+    share a failure mode, and a systematic bias in one vendor should show up
+    as one row rather than be spread thin across five.
+    """
+    if dimension not in ("seat", "theme", "confidence", "model"):
         raise ValueError(f"unknown dimension {dimension!r}")
+    if dimension == "model" and seat_to_model is None:
+        raise ValueError("dimension='model' needs seat_to_model from the roster")
 
     scores: dict[str, SeatScore] = {}
     for outcome in outcomes:
@@ -151,6 +163,9 @@ def score(outcomes: Iterable[Outcome], *, dimension: str = "seat") -> list[SeatS
             keys = list(outcome.seats) or ["(unattributed)"]
         elif dimension == "theme":
             keys = [outcome.theme or "(untagged)"]
+        elif dimension == "model":
+            mapped = {(seat_to_model or {}).get(s, "(unrostered)") for s in outcome.seats}
+            keys = sorted(mapped) or ["(unattributed)"]
         else:
             keys = [str(outcome.confidence or "?")]
         for key in keys:

@@ -24,6 +24,7 @@ from .assign import audit, build_assignment, load_assignments, render_assignment
 from .challenge import load_challenges, unchallenged
 from .coach import coach, coverage_history, grade_crowding, grade_report, level_counts
 from .report import load_report_history, load_reports, seats_reporting
+from .roster import check_filings, load_roster
 from .ledger import (
     calibration_report,
     challenge_report,
@@ -45,6 +46,7 @@ DEFAULT_OUTCOMES = ROOT / "ledger"
 DEFAULT_CHALLENGES = ROOT / "challenges"
 DEFAULT_REPORTS = ROOT / "reports"
 DEFAULT_ASSIGNMENTS = ROOT / "assignments"
+DEFAULT_ROSTER = ROOT / "codex-feed" / "ROSTER.yaml"
 
 
 def _now(value: str | None) -> datetime:
@@ -55,6 +57,24 @@ def _now(value: str | None) -> datetime:
     if parsed.tzinfo is None:
         raise SystemExit("--now needs an explicit timezone offset")
     return parsed.astimezone(timezone.utc)
+
+
+def _counted_challenges(args: argparse.Namespace, tickets) -> dict:
+    """Challenges that count: self-reviews are dropped and said so.
+
+    A challenge filed by the proposer's own model leaves its ticket
+    unchallenged. Every verb that gates on Jev goes through here so the rule
+    cannot be bypassed by picking a different command.
+    """
+    challenges = load_challenges(args.challenges)
+    roster_path = Path(getattr(args, "roster", DEFAULT_ROSTER))
+    if not roster_path.exists():
+        return challenges
+    roster = load_roster(roster_path)
+    kept, dropped = roster.independent_challenges(tickets, challenges)
+    for line in dropped:
+        print(f"SELF-REVIEW {line}", file=sys.stderr)
+    return kept
 
 
 def _open_risk(path: str | None) -> OpenRisk:
@@ -90,6 +110,20 @@ def cmd_validate(args: argparse.Namespace) -> int:
     except (DeskError, OSError) as exc:
         problems.append(f"challenges: {exc}")
         challenges = {}
+
+    roster = None
+    if Path(args.roster).exists():
+        try:
+            roster = load_roster(args.roster)
+            counts = ", ".join(f"{m} {n}" for m, n in sorted(roster.concentration().items()))
+            print(f"roster    ok   {len(roster.seats)} seats ({counts})")
+            problems.extend(check_filings(roster, tickets, challenges))
+            kept, dropped = roster.independent_challenges(tickets, challenges)
+            for line in dropped:
+                print(f"SELF-REVIEW {line}", file=sys.stderr)
+            challenges = kept
+        except (DeskError, OSError) as exc:
+            problems.append(f"roster: {exc}")
 
     try:
         reports = load_reports(args.reports)
@@ -203,7 +237,7 @@ def cmd_fetch(args: argparse.Namespace) -> int:
 def cmd_challenge(args: argparse.Namespace) -> int:
     """What the adversary still owes the desk."""
     tickets = load_tickets(args.tickets)
-    challenges = load_challenges(args.challenges)
+    challenges = _counted_challenges(args, tickets)
     pending = unchallenged([t.id for t in tickets], challenges)
 
     for ticket in tickets:
@@ -262,7 +296,7 @@ def cmd_stamp(args: argparse.Namespace) -> int:
         now=_now(args.now),
         open_risk=_open_risk(args.open_risk),
         available_seats=args.seat or (seats_reporting(load_reports(args.reports)) or None),
-        challenges=load_challenges(args.challenges),
+        challenges=_counted_challenges(args, tickets),
     )
     if args.json:
         payload = {
@@ -296,7 +330,7 @@ def cmd_pack(args: argparse.Namespace) -> int:
     mode = load_mode(args.mode)
     tickets = load_tickets(args.tickets)
     now = _now(args.now)
-    challenges = load_challenges(args.challenges)
+    challenges = _counted_challenges(args, tickets)
     reports = load_reports(args.reports)
     book = stamp_book(tickets, mode, now=now, open_risk=_open_risk(args.open_risk),
                       challenges=challenges,
@@ -464,8 +498,14 @@ def cmd_score(args: argparse.Namespace) -> int:
     if not outcomes:
         print(f"no outcomes recorded under {args.outcomes}; nothing to score yet")
         return 0
-    for dimension in ("seat", "theme", "confidence"):
-        rows = score_outcomes(outcomes, dimension=dimension)
+    seat_to_model = None
+    if Path(args.roster).exists():
+        roster = load_roster(args.roster)
+        if roster.score_by_model:
+            seat_to_model = {s: a.model for s, a in roster.seats.items()}
+    dimensions = ("seat", "theme", "confidence") + (("model",) if seat_to_model else ())
+    for dimension in dimensions:
+        rows = score_outcomes(outcomes, dimension=dimension, seat_to_model=seat_to_model)
         print(f"\n## by {dimension}")
         print(f"{'key':<18} {'prop':>5} {'taken':>6} {'res':>5} {'hit':>6} {'E[R]':>7} {'ΣR':>7}")
         for entry in rows:
@@ -496,6 +536,7 @@ def build_parser() -> argparse.ArgumentParser:
         p.add_argument("--tickets", default=str(DEFAULT_TICKETS))
         p.add_argument("--challenges", default=str(DEFAULT_CHALLENGES))
         p.add_argument("--reports", default=str(DEFAULT_REPORTS))
+        p.add_argument("--roster", default=str(DEFAULT_ROSTER))
 
     p_validate = sub.add_parser("validate", help="structurally check mode, tickets and sources")
     common(p_validate)
@@ -562,6 +603,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_score.add_argument("--tickets", default=str(DEFAULT_TICKETS))
     p_score.add_argument("--outcomes", default=str(DEFAULT_OUTCOMES))
     p_score.add_argument("--challenges", default=str(DEFAULT_CHALLENGES))
+    p_score.add_argument("--roster", default=str(DEFAULT_ROSTER))
     p_score.add_argument("--csv")
     p_score.set_defaults(func=cmd_score)
 

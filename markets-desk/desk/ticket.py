@@ -143,6 +143,9 @@ _TICKET_SPECS = (
     FieldSpec("stop", (int, float), required=False, minimum=0),
     FieldSpec("defined_risk", bool, required=False),
     FieldSpec("notes", str, required=False),
+    # Which model wrote this. Optional; the roster assigns one per seat when it
+    # is absent. When present it lets the adversary rule bite exactly.
+    FieldSpec("model", str, required=False),
 )
 
 _INSTRUMENT_SPECS = (

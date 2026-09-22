@@ -5,6 +5,8 @@ schema_version: 2
 id: WKND-000
 created_at: 2026-09-21T06:30:00-07:00   # timezone required
 source_seats: [Chain]                    # every seat that contributed
+# Which model wrote this. Optional; the roster assigns one per seat.
+model: claude
 
 instrument:
   kind: equity            # equity | etf | crypto_spot | crypto_perp | option | prediction_market
