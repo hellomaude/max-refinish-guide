@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parent.parent
 
 class PresenceTests(unittest.TestCase):
     def test_every_agent_entry_point_exists(self):
-        for name in ("AGENTS.md", "CLAUDE.md", "HANDOFF.md", "HANDOFF-NATIVE.md",
+        for name in ("AGENTS.md", "CLAUDE.md", "GOAL.md", "HANDOFF.md", "HANDOFF-NATIVE.md",
                      ".motif/STATE.md", "prompts/README.md"):
             self.assertTrue((ROOT / name).exists(), f"{name} missing")
 
@@ -86,6 +86,30 @@ class NativeHandoffTests(unittest.TestCase):
         for banned in ("auto-execute", "executes automatically", "places the order for you",
                        "no confirmation needed"):
             self.assertNotIn(banned, lower)
+
+
+class GoalTests(unittest.TestCase):
+    """The goal must stay checkable and must never tick its own boxes."""
+
+    def _text(self) -> str:
+        return (ROOT / "GOAL.md").read_text()
+
+    def test_every_done_condition_is_unticked(self):
+        """Ticks are Max's. An agent that ticks its own goal has no goal."""
+        self.assertNotIn("- [x]", self._text())
+        self.assertGreaterEqual(self._text().count("- [ ]"), 20)
+
+    def test_the_gate_is_named_as_never(self):
+        text = self._text()
+        for needle in ("Never set any venue `live: true`", "Never name a broker",
+                       "Never merge, publish, or mark a PR ready"):
+            self.assertIn(needle, text)
+
+    def test_the_last_condition_pins_the_policy(self):
+        self.assertIn("still has every venue `live: false`", self._text())
+
+    def test_stop_conditions_exclude_silence_on_the_gate(self):
+        self.assertIn("silence here. Ever.", self._text())
 
 
 class StateTests(unittest.TestCase):
