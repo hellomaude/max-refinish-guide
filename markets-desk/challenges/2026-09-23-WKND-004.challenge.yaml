@@ -1,0 +1,94 @@
+# Jev, run as claude. Shadow (qwen3.6-27b) wrote the ticket, so this counts.
+#
+# The ticket exists to verify one claim: that SBLK has a Form 4 insider-buying
+# cluster, meaning several different insiders buying on the open market. The
+# count is real. The "open market" is not. That is the whole challenge.
+schema_version: 2
+ticket_id: WKND-004
+challenger: Jev
+model: claude
+challenged_at: 2026-09-23T07:15:00-07:00
+
+verdict: kill
+confidence_adjustment: -4
+
+strongest_counter: >-
+  The cluster is real on the count and false on the mechanism. Eight SBLK
+  insiders reported buying 244,800 shares on 2026-09-15, every one of them at
+  exactly $28.27. That price is EUR 24.50: the offering price of Star Bulk's
+  Greek public offering of 4.4 million new shares, settled on September 15 and
+  listed on Euronext Athens on September 16. The co-CFO's own filing describes
+  the purchase as made "at an offering price of EUR 24.50" in the parallel
+  offering in Greece; a director's filing says the same. So these are
+  allocations in the company's own primary offering, not open-market purchases:
+  the price was set by the bookrunner, the date was set by the settlement
+  timetable, the participation was disclosed on September 4 before the book
+  opened (the CEO's family interest was announced at up to EUR 6.0 million),
+  and the book was six times oversubscribed. Nasdaq closed at $31.21 on the
+  same September 15, so the insiders "bought" 9.4 percent below the market that
+  day. An insider-buying cluster carries information because insiders chose the
+  price, the timing and the exposure with their own money against the market.
+  Here they chose none of the three, and taking up a pre-announced allocation at
+  a discount in a home-market listing is what a chief executive does to make
+  the listing succeed, not a bet on the freight cycle. The ticket's own
+  invalidation is aimed at the wrong failure: it screens for grants and
+  exercises (codes A and M), but these filings will almost certainly carry code
+  P, so Shadow's adapter counting distinct code-P owners will confirm a cluster
+  that does not mean what the ticket says a cluster means. A thesis whose
+  defining evidence is a different kind of transaction from the one it names is
+  broken, not optimistic.
+
+what_would_change_my_mind: >-
+  Shadow pulls the eight Form 4s from EDGAR (the desk box can reach sec.gov;
+  this session could not) and finds any two distinct reporting owners with a
+  code-P purchase on Nasdaq, dated other than 2026-09-15, at a price that is
+  not $28.27, with no footnote referencing the Greek offering. Two such buys at
+  or above the $31-32 market price since the listing and I withdraw the kill
+  and re-file as a contest. Alternatively, the filings' footnotes state the
+  September 15 purchases were open-market executions that merely coincided with
+  the offering price, which I would treat as settling it the other way.
+
+missed_invalidation: >-
+  The ticket names no exit for a stock that has already moved. SBLK closed at
+  $32.48 on 2026-09-18 against a 52-week high of $32.88 and a 52-week low of
+  $16.72; the insider price is $28.27. Even if the signal were real, the desk
+  would be buying 15 percent above where the insiders bought, and the ticket
+  should say what price makes the insider read irrelevant. It also carries no
+  invalidation for the primary-offering case at all.
+
+evidence_disputed: []
+
+notes: >-
+  Not disputing: the count. Eight distinct reporting owners is more than the
+  "one director's four filings" failure the ticket worried about, and the
+  aggregator did not double-count. The ticket set itself the wrong test and
+  passed it.
+
+  The -4 is for the score record, not the engine: the kill fails the ticket
+  regardless. The insider signal as filed contributes zero. What remains is
+  that executives put roughly $6.9 million of their own money into a discounted
+  allocation they had pre-announced, which is sentiment, and the desk may not
+  originate on sentiment alone.
+
+  Sources, with dates. Offering announcement, timetable and CEO family
+  interest: Star Bulk release of 2026-09-04 via GlobeNewswire,
+  https://www.globenewswire.com/news-release/2026/09/04/3356811/0/en/star-bulk-carriers-corp-announcement-admission-to-parallel-listing-on-euronext-athens-and-equity-offering-in-greece-of-up-to-112-2-million.html
+  Offering price EUR 24.50, EUR 107.8m raised, 6x oversubscribed: Cyprus Mail
+  2026-09-17, https://cyprus-mail.com/2026/09/17/star-bulk-makes-euronext-athens-debut-with-e107-8m-offering
+  Athens opening price EUR 27.05 equal to the Nasdaq close of $31.21 on
+  2026-09-15: Star Bulk release of 2026-09-15 via GlobeNewswire,
+  https://www.globenewswire.com/news-release/2026/09/15/3362716/0/en/announcement-regarding-the-opening-price-of-all-116-071-386-common-shares-issued-and-outstanding-by-star-bulk-carriers-corp-the-company-on-the-main-market-of-the-regulated-securiti.html
+  Co-CFO 15,000 shares at EUR 24.50 / $28.27 "in the parallel offering in
+  Greece", and a director's 2,000 at $28.27 in the "Greek Parallel Offering":
+  Form 4 summaries, https://www.stocktitan.net/sec-filings/SBLK/form-4-star-bulk-carriers-corp-insider-trading-activity-6518d877b0e5.html
+  and https://www.stocktitan.net/sec-filings/SBLK/form-4-star-bulk-carriers-corp-insider-trading-activity-9ec915fbbe3b.html
+  Eight insiders, 244,800 shares, $28.27, $6.92m: Motley Fool filings coverage
+  2026-09-19 and 2026-09-22, https://www.fool.com/coverage/filings/2026/09/19/star-bulk-carriers-director-pappas-buys-74-400-shares-for-usd2-1-million-is-this-a-sign-the-shipping-bull-market-will-continue/
+  Price and 52-week range: Morningstar quote page as of 2026-09-18,
+  https://www.morningstar.com/stocks/xnas/sblk/quote
+
+  Caveat on method: this session's egress proxy blocked sec.gov and every
+  page above, so each fact was read from the search index's excerpt of that
+  page rather than the page itself. The facts agree across five independent
+  outlets and with the company's own two releases, but Shadow should open the
+  Form 4s directly before Max relies on this.

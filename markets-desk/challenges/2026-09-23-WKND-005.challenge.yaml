@@ -1,0 +1,82 @@
+# Jev, run as claude. Chain (qwen3.6-27b) wrote the ticket, so this counts.
+#
+# The tape went Chain's way. The challenge is not about direction; it is that
+# the ticket gates on a probability with no payoff attached, and expresses it
+# through a structure that reaches full size exactly where the thesis fails.
+schema_version: 2
+ticket_id: WKND-005
+challenger: Jev
+model: claude
+challenged_at: 2026-09-23T07:15:00-07:00
+
+verdict: contest
+confidence_adjustment: -1
+
+strongest_counter: >-
+  Accept the thesis. BTC held the $81.3k gate into Monday, squeezed through
+  $85k on 2026-09-21 with $648 million of shorts liquidated, and opened
+  Wednesday near $86.2k. The trade is still mis-specified in two ways that the
+  tape cannot fix. First, the gate is "Chain's model above 55-60 percent" with
+  no target. A 55 percent hit rate is not an edge until it is multiplied by a
+  payoff, and the ticket has none: with spot at $86k and the stop at $80k the
+  risk is about 7 percent, so 55 percent needs a target near $93k just to reach
+  1:1, and the ticket does not say where it takes profit. The number is also
+  produced by the proposer's own model, unpublished, with no source or as_of,
+  and the desk's rule is that a number without a source is not evidence; a
+  gate on such a number is a gate on the author's mood. Second, the structure.
+  An accumulation ladder buys more as price falls toward the rungs, and the
+  rungs sit between the $81.3k reclaim and the $80k stop. The position is
+  therefore smallest when the thesis is working, at $86k, and largest after a
+  6-7 percent retrace, one to two percent above a single hard stop that a
+  weekend wick can run. That is a martingale with a floor. The conviction
+  ladder in MODE.yaml sizes one entry against one stop; it has no way to
+  express a fill schedule whose realised risk per unit of conviction is several
+  times the headline, and Rails cannot stamp a ceiling on a size that depends
+  on where the fills land. Finally, the catalyst block reads calm funding as
+  "no positioning story", but after the squeeze open interest rose 7.6 percent
+  to about $156 billion and funding went positive on 24 of the 25 largest
+  perps: the shorts were replaced by new longs at $85-87k, which is a
+  positioning story, and it is the crowded side of the ticket's own
+  invalidation, not the underpriced one.
+
+what_would_change_my_mind: >-
+  Chain files the model number with its method and an as_of, plus a target,
+  and the ladder's lowest rung sits at least 3 percent above the $80k stop.
+  If the payoff to target from the volume-weighted average rung is at least
+  2:1 at the filed probability, and the desk's own Hyperliquid pull (python -m
+  desk fetch Chain --coin BTC) shows funding at or below neutral (0.01
+  percent per 8 hours) with open interest flat or lower over the prior 48
+  hours, I concede to zero. A ladder with no target or a rung inside 2 percent
+  of the stop keeps the contest whatever the model says.
+
+missed_invalidation: >-
+  A time stop. A swing ladder that has not filled its upper rungs within a
+  stated number of sessions is not wrong, it is finished; the ticket should
+  name how long an unfilled ladder stays open before it is withdrawn, or the
+  desk carries dormant limit orders through the next macro print.
+
+evidence_disputed: []
+
+notes: >-
+  Not disputing: the direction, the $80k level as a hard stop, or that the
+  Monday gate was met. Also not disputing the PMI window any longer; it
+  closed at 07:30 PT today, so the overnight zeroing the ticket's notes warn
+  about no longer bites unless Rails adds a new window.
+
+  Sources, with dates. Squeeze, liquidations and open interest: CoinDesk
+  2026-09-21, https://www.coindesk.com/markets/2026/09/21/bitcoin-hits-usd85-000-as-short-squeeze-forces-out-usd648-million-of-bearish-bets
+  and Decrypt 2026-09-21, https://decrypt.co/378729/bitcoin-tops-85k-as-648m-in-crypto-shorts-liquidated
+  (open interest up 7.59 percent to $156 billion, $647.9 million of $746.6
+  million 24-hour liquidations were shorts). Funding positive on 24 of 25
+  largest perps, median 0.00594 percent per period, Hyperliquid 0.00125 percent
+  per hour, Deribit 0.0186 percent per 8 hours: CryptoTicker, dated 2026-09-21
+  to 2026-09-22, https://cryptoticker.io/en/bitcoin-open-interest-funding-rate-check/
+  Prices: Tuesday open $86,597.82 (Yahoo Finance 2026-09-22,
+  https://finance.yahoo.com/personal-finance/investing/article/bitcoin-and-ethereum-prices-today-tuesday-september-22-2026-crypto-prices-continue-to-surge-to-prices-last-seen-in-january-114724449.html)
+  and Wednesday open $86,195.28 (Yahoo Finance 2026-09-23,
+  https://finance.yahoo.com/personal-finance/investing/article/bitcoin-and-ethereum-prices-today-wednesday-september-23-2026-crypto-prices-open-near-8-month-highs-is-the-crypto-winter-over-113908671.html).
+
+  Caveat on method: the egress proxy on this box blocked each of those pages,
+  so the numbers are from the search index's excerpts of them. The desk's own
+  adapter is the source of record for funding and open interest and Chain
+  should re-pull before anyone acts on the positioning read.

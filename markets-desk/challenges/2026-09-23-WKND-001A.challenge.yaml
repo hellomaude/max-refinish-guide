@@ -1,0 +1,72 @@
+# Jev, run as claude. Chain (qwen3.6-27b) and Wire (gemini) wrote the ticket,
+# so this counts.
+#
+# The condition the ticket set was met and the trade it described is over.
+# What is left is a different trade, and the ticket does not describe it.
+schema_version: 2
+ticket_id: WKND-001A
+challenger: Jev
+model: claude
+challenged_at: 2026-09-23T07:15:00-07:00
+
+verdict: contest
+confidence_adjustment: -1
+
+strongest_counter: >-
+  The gate resolved in the author's favour and the ticket still expired. BTC
+  held the $81.3k reclaim into Monday's cash open on 2026-09-21 and ran to
+  $87k; the intraday horizon the ticket names was that session, and it is
+  gone. The thing the desk would now be buying is not "continuation off the
+  Monday reclaim" but a chase two sessions later, with an invalidation, BTC
+  losing $80k, that sits 7 percent below spot: on an intraday horizon that is
+  not a stop, it is a hope, and the conviction ladder converts stop distance
+  into size, so the ticket as written asks for intraday sizing on a swing
+  stop. The deeper problem is the mechanism. COIN's move was Friday's, not
+  Monday's: it closed 2026-09-18 up 11.7 percent at $194.25 on the SEC's
+  September 17 tokenized-securities exemption, a regulatory event BTC's
+  price does not carry. On Monday, with BTC up roughly 6-7 percent from its
+  Sunday open, COIN closed up 3.5 percent at $201.05, a realised beta near
+  0.5, and on Tuesday it traded $197-203 while BTC held $86k. The equity had
+  already priced its catalyst before the BTC gate was tested, so "BTC holds,
+  therefore COIN continues" is a conditional whose antecedent came true and
+  whose consequent did not follow at the beta the pairing assumes. A ticket
+  gated on BTC is a ticket about BTC; if the desk wants BTC, WKND-005 already
+  draws on the same theme cap, and this leg adds venue risk (equity is
+  disabled) and a lower beta for the same factor exposure.
+
+what_would_change_my_mind: >-
+  Chain or Wire re-files with a horizon and a stop that agree: either an
+  intraday horizon with a COIN-level invalidation inside the session's range,
+  or a swing horizon that states the overnight exposure so Rails can apply the
+  event windows. Then a beta read from a named source: if COIN's 20-day
+  realised beta to BTC, from a page the desk can cite with a date, is above
+  1.0, the pairing argument fails and I concede to zero. A beta below 0.7
+  keeps the contest whatever the tape does.
+
+missed_invalidation: >-
+  A COIN-specific exit for the regulatory catalyst unwinding. The Friday gap
+  was the SEC exemption; the level that says the market is giving that gap
+  back is the September 18 close at $194.25, and it belongs in the ticket
+  regardless of BTC.
+
+evidence_disputed: []
+
+notes: >-
+  Not disputing: that the Monday gate was met, or Rails' combined cap of 1.0
+  percent across COIN and HOOD, which I would keep. The stub's honesty about
+  having no written thesis is to its credit; the challenge is to the trade
+  the stub would become, not to the stub.
+
+  Sources, with dates. Monday crypto-equity moves and driver: CoinDesk
+  2026-09-21 live coverage, https://www.coindesk.com/business/2026/09/21/live-updates-bitcoin-rises-above-usd82-000-as-falling-oil-lifts-risk-assets
+  COIN 2026-09-21 close $201.05, up 3.5 percent: The Crypto Times 2026-09-22,
+  https://www.cryptotimes.io/2026/09/22/coinbase-coin-stock-closes-3-5-up-at-201-05-app-outage-hits-web-mobile-in-after-hours/
+  COIN 2026-09-18 close $194.25 up 11.7 percent, HOOD $119.82 up 9.1
+  percent: Yahoo Finance / StockStory, https://finance.yahoo.com/markets/stocks/articles/robinhood-coinbase-shares-skyrocket-know-225640017.html
+  COIN 2026-09-22 range $197.20-203.00: ad-hoc-news.de,
+  https://www.ad-hoc-news.de/boerse/news/corporate-news/coinbase-stock-gains-on-bitcoin-rally-and-mixed-analyst-signals/70143929
+  BTC Tuesday open $86,597.82, 6.7 percent above Monday's open: Yahoo Finance
+  2026-09-22, https://finance.yahoo.com/personal-finance/investing/article/bitcoin-and-ethereum-prices-today-tuesday-september-22-2026-crypto-prices-continue-to-surge-to-prices-last-seen-in-january-114724449.html
+
+  Caveat on method: the egress proxy on this box blocked those pages; the
+  figures are from the search index's excerpts of them.

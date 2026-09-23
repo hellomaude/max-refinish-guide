@@ -60,14 +60,14 @@
         "allowed_pct": 0.0,
         "theme": "crypto_policy_beta",
         "binding_constraint": "venue.equity.disabled",
-        "challenge_verdict": "",
+        "challenge_verdict": "contest",
         "effective_confidence": 1,
         "reasons": [
           "No equity venue named. Equity ideas may be researched and stamped but cannot be turned into order sheets. Arm this only by naming a broker here and moving execution to broker_sheets."
         ],
         "stale_evidence": [],
         "missing_seats": [],
-        "stamp_sha256": "1b5df92e198112b1a8e875c5c83798e99b2be914ad6fab50253dc6deb98d6d3a"
+        "stamp_sha256": "bce15b806e8d450fcde16572a6bc1ba6ac0ee976c021834973479d422b85d5c5"
       },
       {
         "ticket_id": "WKND-001B",
@@ -76,14 +76,14 @@
         "allowed_pct": 0.0,
         "theme": "crypto_policy_beta",
         "binding_constraint": "venue.equity.disabled",
-        "challenge_verdict": "",
+        "challenge_verdict": "contest",
         "effective_confidence": 1,
         "reasons": [
           "No equity venue named. Equity ideas may be researched and stamped but cannot be turned into order sheets. Arm this only by naming a broker here and moving execution to broker_sheets."
         ],
         "stale_evidence": [],
         "missing_seats": [],
-        "stamp_sha256": "b179fd25c1a6559dbe095c1de0a1b507e3cf2bc391527b0933394de78cdc1477"
+        "stamp_sha256": "4009cec3f9bb67ef1d674cf331f09ab7977dd4ceab6d3241b6d3d3098f5014c3"
       },
       {
         "ticket_id": "WKND-002",
@@ -110,14 +110,14 @@
         "allowed_pct": 0.0,
         "theme": "insider_shipping",
         "binding_constraint": "venue.equity.disabled",
-        "challenge_verdict": "",
+        "challenge_verdict": "kill",
         "effective_confidence": 1,
         "reasons": [
           "No equity venue named. Equity ideas may be researched and stamped but cannot be turned into order sheets. Arm this only by naming a broker here and moving execution to broker_sheets."
         ],
         "stale_evidence": [],
         "missing_seats": [],
-        "stamp_sha256": "b77f6b1f3582e3f6c062d4ed80c997b7577929aa48538fc65fc5ee046db11412"
+        "stamp_sha256": "14283315d7db5a4cd7b2dd7f6e5771ae45ec24a665619666f464442026d9db60"
       },
       {
         "ticket_id": "WKND-005",
@@ -125,15 +125,16 @@
         "requested_pct": 0.0,
         "allowed_pct": 0.0,
         "theme": "crypto_policy_beta",
-        "binding_constraint": "unchallenged",
-        "challenge_verdict": "",
+        "binding_constraint": "size_hint",
+        "challenge_verdict": "contest",
         "effective_confidence": 1,
         "reasons": [
-          "no challenge on record; the desk does not size a thesis nobody argued against"
+          "ticket is marked pending; allowance is provisional",
+          "challenged: conviction 1 -> 1 (Accept the thesis)"
         ],
         "stale_evidence": [],
         "missing_seats": [],
-        "stamp_sha256": "b279bc7f07e9302fa1d2da1225d61e4ba69b0e7b8e750f3f40d3b19958d40940"
+        "stamp_sha256": "0ac984c5956fade12a6ff8968f788ed4eb5ce141e6313997ad4857dad666996c"
       }
     ]
   },

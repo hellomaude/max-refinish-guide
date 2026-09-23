@@ -1,0 +1,76 @@
+# Jev, run as claude. Chain (qwen3.6-27b) and Wire (gemini) wrote the ticket,
+# so this counts.
+#
+# Everything in the COIN challenge applies here. What is added is that HOOD
+# is the wrong instrument for the thesis, and the evidence is HOOD's own
+# income statement.
+schema_version: 2
+ticket_id: WKND-001B
+challenger: Jev
+model: claude
+challenged_at: 2026-09-23T07:15:00-07:00
+
+verdict: contest
+confidence_adjustment: -2
+
+strongest_counter: >-
+  HOOD does not express a BTC continuation, and its own numbers say so. In
+  the quarter ended 2026-06-30 Robinhood's crypto transaction revenue was
+  $100 million on total net revenues of $1.31 billion, about 7.6 percent, down
+  38 percent year on year, and smaller than its $156 million from prediction
+  markets; options were $342 million and equities $129 million. A name whose
+  crypto line is one dollar in thirteen is a retail-activity and rates story
+  with a crypto flavour, not a BTC beta, and the tape agreed: on Monday
+  2026-09-21, with BTC up roughly 6-7 percent from its Sunday open, HOOD
+  closed up about 3 percent against an S&P 500 up 1.5 percent, and on Tuesday
+  it rose 2.9 percent to $123.30 on a session where BTC was flat near $86k.
+  That is an equity beta to a strong tape, not a crypto beta to a squeeze.
+  Pairing it with COIN as one "continuation" leg gated on BTC holding $81.3k
+  gives the desk two problems: the gate does not govern HOOD's return, and
+  the combined cap treats two instruments with roughly a 2:1 difference in
+  realised BTC sensitivity as one exposure, so the cap is either too tight for
+  COIN or too loose for HOOD depending on which leg fills. Add the COIN
+  objections, which carry over whole: the intraday horizon was Monday and has
+  passed, the $80k BTC invalidation is 7 percent below spot and is not an
+  intraday stop, and the Friday move (HOOD up 9.1 percent to $119.82 on
+  2026-09-18) was the SEC exemption, priced before the BTC gate was tested. A
+  thesis about BTC should not be routed through the instrument in the theme
+  with the least BTC in it.
+
+what_would_change_my_mind: >-
+  A dated, cited beta: HOOD's 20-day realised beta to BTC above 1.0 from a
+  source the desk can name, or Chain and Wire restating the HOOD leg on its
+  actual drivers (retail options and equities volume, prediction-market
+  revenue, rates) with an invalidation in those terms rather than a BTC level.
+  Either and I move to a -1 contest on the horizon problem alone; a beta
+  below 0.7 and the -2 stands.
+
+missed_invalidation: >-
+  HOOD's own reclaim level. The ticket names "the prior session's reclaim
+  level" without a number; the September 18 close of $119.82 is the level at
+  which the regulatory gap is being given back, and it should be written down.
+  There is also no invalidation tied to HOOD's real drivers, so the position
+  could be wrong for HOOD reasons without any BTC level being hit.
+
+evidence_disputed: []
+
+notes: >-
+  Not disputing the Monday gate or Rails' combined 1.0 percent cap across
+  COIN and HOOD; I would keep the cap and point out it is doing work the
+  pairing does not deserve.
+
+  Sources, with dates. Robinhood Q2 2026 results, released 2026-07-29:
+  https://investors.robinhood.com/news-releases/news-release-details/robinhood-reports-second-quarter-2026-results
+  with the segment figures as reported by The Crypto Times 2026-07-30,
+  https://www.cryptotimes.io/2026/07/30/robinhood-q2-revenue-hits-record-1-31b-crypto-earnings-fall-38/
+  and Yahoo Finance, https://finance.yahoo.com/markets/stocks/articles/robinhood-q2-2026-earnings-beat-132303262.html
+  HOOD 2026-09-21 close up nearly 3 percent vs S&P 500 up 1.5 percent: Motley
+  Fool 2026-09-21, https://www.fool.com/investing/2026/09/21/why-robinhood-markets-crushed-it-on-monday/
+  HOOD 2026-09-22 close $123.30 up 2.90 percent, range $121.50-126.41:
+  ad-hoc-news.de, https://www.ad-hoc-news.de/boerse/news/nebenwerte/robinhood-markets-stock-rises-at-the-close-on-september-22/70159964
+  HOOD 2026-09-18 close $119.82 up 9.1 percent: Yahoo Finance / StockStory,
+  https://finance.yahoo.com/markets/stocks/articles/robinhood-coinbase-shares-skyrocket-know-225640017.html
+  BTC levels: as cited in the WKND-001A challenge.
+
+  Caveat on method: the egress proxy on this box blocked those pages; the
+  figures are from the search index's excerpts of them.
