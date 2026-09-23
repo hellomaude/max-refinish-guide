@@ -1,0 +1,123 @@
+# Odds seat, 2026-09-23 session. Filed by claude.
+#
+# The venue side of this read could not be verified: gamma-api.polymarket.com,
+# clob.polymarket.com and polymarket.com are egress-blocked from the desk box,
+# as are congress.gov, senate.gov and dailypress.senate.gov. Every row below is
+# a search-engine rendering of the named page, not the page itself, and says so.
+schema_version: 2
+seat: Odds
+model: claude
+produced_at: 2026-09-23T05:11:00-07:00
+
+read: no_read
+
+headline: >-
+  Do not size WKND-002 this session: the 92.5c No entry, the Gamma resolution
+  text and CLOB depth are all unverifiable from this box, while nothing on the
+  Senate floor through Sep 22 touched H.R.3633 and the latest Congress.gov
+  action is still the Sep 15 motion to reconsider.
+
+covers: [clarity-act-signed-2026, H.R.3633]
+crowding: {}
+
+evidence:
+  - key: senate_cloture_vote
+    kind: legislative
+    value: >-
+      "By a vote of 49-50, the Senate did not agree to the motion to invoke
+      cloture on the motion to proceed to H.R.3633" (Record Vote 234; 60
+      required). Tillis switched to no at the close to be on the prevailing
+      side.
+    source: >-
+      U.S. Senate Daily Press, Tuesday September 15, 2026, via search-engine
+      rendering (host egress-blocked). Time of day carried from the ticket.
+    as_of: 2026-09-15T14:30:00-07:00
+    url: https://www.dailypress.senate.gov/tuesday-september-15-2026/
+  - key: motion_to_reconsider
+    kind: legislative
+    value: >-
+      Congress.gov action, 09/15/2026: "A motion by Senator Tillis to
+      reconsider the vote by which cloture on the motion to proceed to the
+      measure was not invoked (Record Vote No. 234) was entered in Senate."
+    source: >-
+      Congress.gov H.R.3633 all-actions, via search-engine rendering (host
+      egress-blocked). Congress.gov records the date only; time carried from
+      the ticket.
+    as_of: 2026-09-15T14:45:00-07:00
+    url: https://www.congress.gov/bill/119th-congress/house-bill/3633/all-actions
+  - key: congress_latest_action
+    kind: legislative
+    value: >-
+      Latest recorded action on H.R.3633 is still the 09/15/2026 motion to
+      reconsider; no later action recorded.
+    source: >-
+      Congress.gov H.R.3633 all-actions as indexed by search engine at the
+      time of the read (page egress-blocked).
+    as_of: 2026-09-23T12:05:00+00:00
+    url: https://www.congress.gov/bill/119th-congress/house-bill/3633/all-actions
+  - key: senate_floor_2026_09_22
+    kind: legislative
+    value: >-
+      Senate convened 3:00 p.m. ET, resumed the Colmenero nomination with a
+      5:30 p.m. cloture vote; cloture filed on S.4668 and the Cruz-Cantwell
+      substitute; Rule 14 on two bills. No action on H.R.3633.
+    source: >-
+      U.S. Senate Daily Press, Tuesday September 22, 2026, via search-engine
+      rendering (host egress-blocked).
+    as_of: 2026-09-22T15:00:00-04:00
+    url: https://www.dailypress.senate.gov/tuesday-september-22-2026/
+  - key: sec_innovation_exemption
+    kind: legislative
+    value: >-
+      SEC order of 2026-09-17 (press release 2026-90): five-year exemption
+      from the "exchange" and "dealer" definitions for qualifying tokenized
+      NMS stock venues and AMM liquidity providers, through 2031-09-17; CFTC
+      Staff Letter No. 26-25 the same day. An exemptive order is not a signed
+      statute and cannot satisfy "signed into law".
+    source: >-
+      SEC press release 2026-90 and Dechert / Mayer Brown notes, via
+      search-engine rendering. Time of day carried from the ticket.
+    as_of: 2026-09-17T13:00:00-07:00
+    url: https://www.sec.gov/newsroom/press-releases/2026-90-sec-issues-innovation-exemption-facilitate-trading-tokenized-nms-stock-request-comment
+  - key: no_price_search_rendering
+    kind: news
+    value: >-
+      About 93% No on "Clarity Act (H.R.3633) signed into law in 2026?" per
+      the search-engine rendering of polymarket.com. NOT a Gamma read; no
+      exact capture time; corroboration only.
+    source: >-
+      polymarket.com predictions page as rendered by search engine at the
+      time of the read (host egress-blocked).
+    as_of: 2026-09-23T12:05:00+00:00
+    url: https://polymarket.com/predictions/clarity-act
+
+excluded_sources: []
+
+unavailable:
+  - gamma-api.polymarket.com (egress-blocked; adapter returned tunnel 403)
+  - clob.polymarket.com (egress-blocked; Jev's depth condition unchecked)
+  - polymarket.com event page (egress-blocked; resolution text unverified)
+  - congress.gov, senate.gov roll-call, dailypress.senate.gov, govtrack.us (egress-blocked; read via search-engine renderings only)
+  - "desk fetch Odds --depth-at (flag does not exist in desk/cli.py)"
+  - risk-free 3-month bill rate for the net-of-lock-up comparison (Ledger's series; not fetched)
+
+notes: >-
+  Odds owns resolution wording and this session could not fetch it, so the
+  read is no_read on the market even though the legislative side is clear
+  and unchanged. Search-engine rendering of the event page gives the rules
+  as: "The market will resolve to 'Yes' if the Digital Asset Market Clarity
+  Act of 2025 (H.R.3633) is passed by both chambers of the U.S. Congress and
+  signed into law by December 31, 2026, 11:59 PM ET." That is consistent
+  with the ticket's argument (Senate passage and an SEC exemption are each
+  not "signed into law") but it is a rendering, not the Gamma description
+  field, and the seat still owes the exact text. The same rendering shows
+  $22.78M traded "as of September 22", carried here rather than as evidence
+  because it has no time of day. WKND-002's yes_price row is now past the
+  24h price tolerance; Rails should refuse on staleness, which is the right
+  outcome until a live read lands. Still owed under the Odds contract before
+  size: annualised return net of lock-up versus risk-free for the same
+  tenor (gross from the ticket's own entry is about 29% annualised over the
+  ~100 days to Dec 31, before spread, fees and settlement delay; the
+  risk-free leg is Ledger's). Wire should chase the Sep 23-25 floor schedule
+  and any Thune statement on re-running the vote; nothing surfaced in search
+  through Sep 23.

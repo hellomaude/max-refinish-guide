@@ -5,6 +5,12 @@
 # 50-49). The Senate record is 49-50, Roll Call 234. Corrected below, and the
 # two facts that matter more than the tally are now carried as evidence:
 # a pending motion to reconsider, and the SEC acting administratively on Sep 17.
+#
+# Revision 2026-09-23T05:15 PT (Odds): legislative rows re-sourced and two
+# added (no floor action through Sep 22; Congress.gov latest action unchanged).
+# The venue rows are NOT refreshed: Gamma, CLOB and polymarket.com are
+# egress-blocked from the desk box, so no live price, resolution text or depth
+# was obtainable. yes_price below is left as the stale, unverified weekend read.
 schema_version: 2
 id: WKND-002
 created_at: 2026-09-20T09:30:00-07:00
@@ -57,15 +63,52 @@ defined_risk: true
 evidence:
   - key: senate_cloture_vote
     kind: legislative
-    value: "rejected 49-50 on the motion to proceed, Roll Call 234, 60 required"
-    source: Senate roll call record 119-2-234, via CNBC / National Law Review
+    value: >-
+      "By a vote of 49-50, the Senate did not agree to the motion to invoke
+      cloture on the motion to proceed to H.R.3633" (Record Vote 234; 60
+      required). Tillis switched yes-to-no at the close of the roll to be on
+      the prevailing side, so support was 50 not 49.
+    source: >-
+      U.S. Senate Daily Press, Tuesday September 15, 2026, and Congress.gov
+      all-actions, both read via search-engine rendering (hosts egress-blocked
+      from the desk box on 2026-09-23). Time of day carried from revision 2.
     as_of: 2026-09-15T14:30:00-07:00
-    url: https://www.senate.gov/legislative/LIS/roll_call_votes/vote1192/vote_119_2_00234.htm
+    url: https://www.dailypress.senate.gov/tuesday-september-15-2026/
   - key: motion_to_reconsider
     kind: legislative
-    value: "Tillis entered a motion to reconsider; bill stays on the calendar"
-    source: Senate floor record, 2026-09-15
+    value: >-
+      Congress.gov action, 09/15/2026: "A motion by Senator Tillis to
+      reconsider the vote by which cloture on the motion to proceed to the
+      measure was not invoked (Record Vote No. 234) was entered in Senate."
+      Bill remains on the Senate calendar.
+    source: >-
+      Congress.gov H.R.3633 all-actions, via search-engine rendering (host
+      egress-blocked from the desk box on 2026-09-23). Time of day carried
+      from revision 2; Congress.gov records the date only.
     as_of: 2026-09-15T14:45:00-07:00
+    url: https://www.congress.gov/bill/119th-congress/house-bill/3633/all-actions
+  - key: congress_latest_action
+    kind: legislative
+    value: >-
+      Latest recorded action on H.R.3633 is still the 09/15/2026 entry of the
+      Tillis motion to reconsider. No later action recorded.
+    source: >-
+      Congress.gov H.R.3633 all-actions as indexed by search engine at the
+      time of the read (page itself egress-blocked from the desk box).
+    as_of: 2026-09-23T12:05:00+00:00
+    url: https://www.congress.gov/bill/119th-congress/house-bill/3633/all-actions
+  - key: senate_floor_2026_09_22
+    kind: legislative
+    value: >-
+      Senate convened 3:00 p.m. ET and resumed the Colmenero (S.D. Tex.)
+      district-judge nomination, cloture vote at 5:30 p.m.; cloture filed on
+      S.4668 (sports bill) and the Cruz-Cantwell substitute; Rule 14 on two
+      bills. No action on H.R.3633 or the motion to reconsider.
+    source: >-
+      U.S. Senate Daily Press, Tuesday September 22, 2026, via search-engine
+      rendering (host egress-blocked from the desk box).
+    as_of: 2026-09-22T15:00:00-04:00
+    url: https://www.dailypress.senate.gov/tuesday-september-22-2026/
   - key: negotiator_defection
     kind: legislative
     value: "all 7 Democratic negotiators voted no; Coons not voting"
@@ -80,11 +123,18 @@ evidence:
   - key: sec_administrative_route
     kind: legislative
     value: >-
-      SEC issued a five-year Innovation Exemption for onchain trading of
-      tokenized stocks on 2026-09-17; CFTC issued a developer no-action
-      position. Does NOT resolve this market Yes.
-    source: SEC / CFTC releases, 2026-09-17
+      SEC order of 2026-09-17 (press release 2026-90): five-year exemptive
+      relief, 2026-09-17 through 2031-09-17, exempting qualifying tokenized
+      securities venues from the "exchange" definition (Exchange Act 3(a)(1))
+      and AMM liquidity providers from the "dealer" definition (3(a)(5)).
+      CFTC Staff Letter No. 26-25 issued the same day. An exemptive order is
+      not a statute and does NOT resolve this market Yes.
+    source: >-
+      SEC press release 2026-90 and Dechert / Mayer Brown client notes, via
+      search-engine rendering (sec.gov not fetched directly). Time of day
+      carried from revision 2.
     as_of: 2026-09-17T13:00:00-07:00
+    url: https://www.sec.gov/newsroom/press-releases/2026-90-sec-issues-innovation-exemption-facilitate-trading-tokenized-nms-stock-request-comment
   - key: yes_price
     kind: price
     value: 0.0755
@@ -111,3 +161,35 @@ notes: >-
   Jev's surviving objection is about the trade, not the legislation: this is
   short-vol carry on a thin book and the desk has no sizing regime for short
   vol. See challenges/2026-09-20-WKND-002.challenge.yaml.
+
+  Odds note, 2026-09-23T05:15-07:00. Both debts above are still owed, and
+  this session could not pay them: gamma-api.polymarket.com,
+  clob.polymarket.com and polymarket.com are egress-blocked from the desk
+  box, as are congress.gov, senate.gov and dailypress.senate.gov, so the
+  adapter returned nothing and the legislative rows were re-sourced from
+  search-engine renderings of those pages rather than the pages themselves.
+  The yes_price row is now three days old against a 24h price tolerance and
+  Rails should refuse this ticket on staleness until a real Gamma read lands.
+  What the search rendering of polymarket.com shows, NOT a Gamma read and
+  not to be traded on: about 93c No, about 6-7c Yes, and $22.78M traded "as
+  of September 22". If that is right, No is roughly half a cent above the
+  0.925 entry, which does not break the thesis's comparison (Yes offered
+  around 7c versus low-single-digit fair value) but does thin it. Resolution
+  wording as the search engine renders the event page: "The market will
+  resolve to 'Yes' if the Digital Asset Market Clarity Act of 2025
+  (H.R.3633) is passed by both chambers of the U.S. Congress and signed into
+  law by December 31, 2026, 11:59 PM ET." Treat that as a rendering, not the
+  Gamma description field; the seat still owes the exact text. On the
+  legislation nothing moved: no floor action through Sep 22, the latest
+  Congress.gov action is still the Sep 15 motion to reconsider, and the SEC
+  route is an exemptive order, which cannot satisfy "signed into law".
+  Still missing before this can carry size under the Odds contract: the
+  annualised return net of lock-up against a risk-free alternative for the
+  same tenor. Gross arithmetic from the ticket's own entry, no new fact:
+  0.925 to 1.00 over roughly 100 days to the Dec 31 deadline is 8.1% gross,
+  about 29% annualised before spread, fees and settlement delay; at the
+  rendered 0.93 it is 7.5% gross, about 27% annualised. The risk-free leg
+  needs Ledger's 3-month bill series, not a number typed here. Jev's depth
+  condition (>$5k resting within 2c of the No mid) also remains unchecked
+  because the CLOB is unreachable. The `--depth-at` flag named in the seat
+  prompt does not exist in desk/cli.py.
