@@ -200,3 +200,114 @@ here is either a maybe with a real cost, or adjacent software.
 The manifest is worth doing because it fixes a failure this desk already had —
 six connectors half-attached and nothing noticing — and because
 `docs/CONNECTORS.md` currently gives advice with no mechanism behind it.
+
+---
+
+## Update 2026-09-23
+
+Routine re-check of the nine, plus a search for new projects. Method: each
+repository page was fetched directly on 2026-09-23 and the licence read from
+the page. Release dates are as the release pages show them. Nothing below
+was taken from a search-engine summary unless it says so.
+
+### The nine: no licence change, no verdict change
+
+| Repo | Licence on 2026-09-23 | Changed? |
+|---|---|---|
+| anthropics/financial-services | Apache 2.0 | no; README still ships `plugins/vertical-plugins/financial-analysis/.mcp.json` |
+| kestra-io/kestra | Apache 2.0 | no |
+| yetone/cumora | MIT | no |
+| lidge-jun/opencodex | MIT | no |
+| Open-Dev-Society/OpenStock | AGPL-3.0 | no; the page now spells out that deploying "as a web service" triggers source release |
+| koala73/worldmonitor | AGPL-3.0-only, commercial licence offered | no |
+| isair/jarvis | free for personal use, commercial by arrangement | no |
+| AppFlowy-IO/AppFlowy | AGPLv3 | no |
+| Leantime/leantime | AGPL-3.0, with a plugin-directory exception | no |
+
+No archive or deprecation banner on any of the nine. All nine verdicts stand.
+The "one concrete action" from the original assessment is done:
+`codex-feed/connectors.json` exists and `desk validate` asserts against it.
+
+### New projects that touch a seat
+
+Found by searching for research desks, insider-filing readers,
+prediction-market tooling and GEX calculators released since roughly
+June 2026. Only permissively licensed, read-only projects are listed; the
+AGPL ones found are named at the end so nobody re-discovers them.
+
+**Shadow (Form 4, 13F)**
+
+- **dgunning/edgartools** — MIT. Python library: "Read and analyze SEC EDGAR
+  filings in Python. 10-K, 8-K, XBRL financials, Form 3/4/5, 13F, ADV".
+  Latest release v5.58.0 on 2026-09-11; v5.51.0 notes a 2.7x speedup on
+  Forms 3/4/5 parsing and a 13F unit-ambiguity warning
+  ([releases](https://github.com/dgunning/edgartools/releases)). Not new
+  (2022), but the most complete permissive parser for exactly the forms
+  Shadow reads. **Candidate cross-check** for `desk/adapters/edgar.py`; the
+  desk's taste is stdlib plus PyYAML, so this is a question for Max, not a
+  dependency to add.
+- **LuxAlgo/market-trackers** — MIT code, CC0 data. TypeScript pipeline over
+  "congress trades, insider filings, 13F holdings, government contracts,
+  lobbying, short-sale volume" with an MCP server; ingests Forms 3/4/5 and
+  13F-HR ([repo](https://github.com/LuxAlgo/market-trackers)). Weeks old and
+  small; skim the source list, take no code yet.
+
+**Odds (Polymarket)**
+
+- **nahrek/polyledger** — MIT. "A resumable indexer for Polymarket market
+  metadata and on-chain trade data, backed by DuckDB." Reads CLOB and Gamma
+  plus Polygon `OrderFilled` events; read-only, places no orders
+  ([repo](https://github.com/nahrek/polyledger), last commit shown
+  2026-09-02). **Maybe**: it is the only permissive way found to get a
+  resolved market's full trade history, which Gamma does not serve. It
+  needs a Polygon HyperSync endpoint, which is one more upstream.
+- **simonlin1212/globalpercent** — Apache-2.0. Reference code, not a
+  library: zero-auth reads of Gamma `/markets`, CLOB `/prices-history` and
+  `/midpoint`, and Kalshi `/events` and `/markets?series_ticker=`; documents
+  Kalshi's 2026-06 move of price fields to `*_dollars`
+  ([repo](https://github.com/simonlin1212/globalpercent)). Worth reading
+  before any Kalshi adapter is written.
+
+**Pulse (GEX from the CBOE delayed chain)**
+
+- **Darthreign/gex-dashboard** — MIT. Plotly Dash GEX/DEX dashboard for
+  SPX/NDX/SPY/QQQ reading the same
+  `cdn.cboe.com/api/global/delayed_quotes/options/_SPX.json` the desk
+  registers, no key ([repo](https://github.com/Darthreign/gex-dashboard)).
+  An application, and the desk's rule is to compute GEX itself; useful only
+  as a second implementation to check `desk/adapters/cboe.py` against.
+- **itsfabtrading/Gex-Multi** — Apache-2.0, with `cboe_data.py` and
+  `gamma_exposure.py` vendored under MIT from GMestreM/gex_data
+  ([repo](https://github.com/itsfabtrading/Gex-Multi)). Same use: a
+  reference implementation of gamma flip and call/put walls.
+
+**Research-desk frameworks**
+
+- **TauricResearch/TradingAgents** — Apache-2.0. v0.5.0 (released 18 Sep;
+  the page omits the year, and the repo's news list places it in September
+  2026) adds point-in-time data: "SEC EDGAR serves US company statements as
+  they stood on the run's date: a period that has ended but has not been
+  filed is not served" and "Dated tools take the run's date from graph
+  state, so an omitted or later date cannot reach a vendor"
+  ([release](https://github.com/TauricResearch/TradingAgents/releases/tag/v0.5.0)).
+  **Skip the code** (it is a trading framework with an execution path);
+  the point-in-time rule is the same `as_of` doctrine this desk enforces,
+  and the release note is a good statement of it.
+
+**Found and disqualified (AGPL-3.0):** gammagrid/gammagrid (GEX dashboard on
+yfinance, [repo](https://github.com/gammagrid/gammagrid)),
+rufeng0411/Nova-TradingAgent, COLARDYNIT/quorumtrading. The last two were
+seen in the search pass and not fetched directly.
+
+**Seen, not assessed:** kyky2347/ALTA (Apache-2.0, "research-only
+multi-agent trading platform", from the search pass only),
+simonlin1212/Vibe-Research (MIT; full research flow is A-share only),
+carrotly-ai/disclosures (Apache-2.0 EDGAR/GLEIF library plus MCP server,
+near-zero adoption), jsconiers/traders-edge-mcp (MIT, key-less CBOE plus
+TreasuryDirect MCP server, some tools need a broker session).
+
+### What this changes
+
+Nothing in the verdict table. Two questions for Max, carried in the PR:
+whether edgartools becomes Shadow's cross-check, and whether polyledger is
+worth an upstream for resolved-market history on Odds.

@@ -102,3 +102,121 @@ timestamp. `desk/risk.py` then refuses any ticket leaning on greeks older than
 
 "Insider One" in the connector directory is marketing-campaign software, not
 insider filings. Shadow's data comes from EDGAR.
+
+---
+
+## Update 2026-09-23
+
+Routine re-check of the direct-HTTP sources and a search for new free ones.
+**Method caveat:** the official documentation hosts (sec.gov,
+docs.polymarket.com, docs.kalshi.com, finnhub.io, hyperliquid.gitbook.io,
+coinalyze.net, alphavantage.co, financialmodelingprep.com) were all
+egress-blocked from this session. Every quote below is the search engine's
+excerpt of the named official page, not a direct read. Re-run from the box
+before changing `sources.yaml`.
+
+### Polymarket: read endpoints still keyless, but the catalogue route is on notice
+
+- **Auth.** "The Gamma API and Data API are fully public, no authentication
+  required"; CLOB read endpoints (order book, prices, spreads) are also
+  unauthenticated
+  ([getting-started/api](https://docs.polymarket.com/getting-started/api)).
+- **Gamma pagination.** Keyset endpoints `GET /markets/keyset` and
+  `GET /events/keyset` were added 2026-04-10; the offset-based `GET /markets`
+  and `GET /events` "remain available but will be deprecated in a future
+  release". On 2026-05-14 the keyset maximum `limit` was cut to 100
+  ([changelog](https://docs.polymarket.com/changelog)). The Odds adapter
+  reads `GET /markets?slug=`, which is the offset family, so this is a
+  future break with no date yet.
+- **Price history moved.** `GET /v2/prices-history` on
+  `data-api.polymarket.com/v2` replaces the CLOB-hosted route; v1 is
+  "frozen"; the API returns 429 with `Retry-After`
+  ([data-api overview](https://docs.polymarket.com/api-reference/data-api/overview);
+  entry date not captured). The adapter does not read price history today.
+- **CLOB V2** went live April 2026 and V1 signed orders are no longer
+  supported ([v2-migration](https://docs.polymarket.com/v2-migration)).
+  Irrelevant to the desk by doctrine, since it never signs.
+- **Rate limits** are IP-based and throttled rather than rejected:
+  CLOB "/books 50 requests per 10 seconds, /price 100 requests per 10
+  seconds, markets/0x 50 requests per 10 seconds"
+  ([rate-limits](https://docs.polymarket.com/api-reference/rate-limits)).
+  The "~60/100 req/min" figures in `sources.yaml` are not what the page
+  says; the Gamma numeric limit was not captured at all.
+
+### Kalshi: a keyless read API the desk does not use
+
+Kalshi publishes "public endpoints that don't require API keys" at
+`https://external-api.kalshi.com/trade-api/v2`
+([quick start, market data](https://docs.kalshi.com/getting_started/quick_start_market_data)).
+Rate limiting is a token bucket where "Most requests cost the default of 10
+tokens" and the Basic tier read budget is "200 tokens-per-second"
+([rate limits](https://docs.kalshi.com/getting_started/rate_limits)).
+WebSockets need an authenticated session. Price fields moved to
+`*_dollars` in June 2026 (see globalpercent in `docs/PRIOR-ART.md`).
+This is the obvious second prediction-market source for Odds: free, no key,
+no wallet, and a different venue's resolution text to compare against
+Polymarket's. Whether Odds should read it is a question for Max.
+
+### Chain: numbers to pin
+
+- **Hyperliquid.** "REST requests share an aggregated weight limit of 1200
+  per minute per IP address"; `/info` calls weigh 2 for the light reads and
+  20 by default
+  ([rate limits](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/rate-limits-and-user-limits)).
+  No change; still no key.
+- **Coinalyze.** "The rate limit is 40 API calls per minute per API Key",
+  429 with `Retry-After`; free key on sign-up
+  ([API doc](https://api.coinalyze.net/v1/doc/)). `sources.yaml` says
+  "generous limits"; 40/min is the number.
+- **Spot ETF flows.** No official free API found. Farside and SoSoValue
+  remain HTML scrapes.
+
+### Pulse, Ledger: the free tiers are thinner than the registry implies
+
+- **Alpha Vantage** free key: "standard usage limit of 25 API requests per
+  day" ([support](https://www.alphavantage.co/support/)). As Pulse's chain
+  fallback that is one full-chain pull a day at best.
+- **FMP** free plan: "250 market data API requests per day", a "trailing
+  30 days bandwidth limit of 500MB", about five years of prices and five
+  quarters of statements; access was refactored to per-plan endpoint
+  restrictions and the legacy v3 endpoints "may not receive regular
+  updates" ([pricing](https://site.financialmodelingprep.com/developer/docs/pricing)).
+- **Finnhub** (the Ledger fallback the prior-art page suggested): the free
+  tier and the `/docs/api/rate-limit` page exist, but the page text was not
+  captured. Third parties cite 60 calls/min on the free key; **unverified
+  against the page**, so it is not written as a number here. Which of
+  quotes, fundamentals, insider transactions and filings are free is also
+  unverified.
+- **FRED**: free key, no numeric limit found on FRED's own pages; the
+  "2 requests per second" line that circulates appears to belong to the
+  FRASER API. **Unverified.**
+- **CBOE delayed chain JSON**: no official documentation page for the
+  `cdn.cboe.com` endpoint was found, and cboe.com's delayed-quotes pages say
+  automated extraction is prohibited and IPs may be blocked. The endpoint
+  is in use by several open projects (see `docs/PRIOR-ART.md`), but its
+  availability is a courtesy, not a contract. Keep the poll interval honest.
+
+### SEC EDGAR: no change
+
+- Rate limit unchanged: "The current maximum request rate is 10 requests
+  per second" "regardless of the number of machines used", and a
+  User-Agent declaring company and contact
+  ([Accessing EDGAR data](https://www.sec.gov/search-filings/edgar-search-assistance/accessing-edgar-data)).
+- `data.sec.gov` submissions and XBRL APIs "do not require any
+  authentication or API keys"; bulk ZIPs republished nightly around 3:00 am
+  ET ([EDGAR APIs](https://www.sec.gov/search-filings/edgar-application-programming-interfaces)).
+- Full-text search at `efts.sec.gov` still has no official API page, only
+  the UI FAQ. No change found.
+- EDGAR Release 26.3 deployed 2026-09-14 covers XBRL taxonomies and filer
+  interfaces, nothing on the public data APIs
+  ([release notes](https://www.sec.gov/submit-filings/edgar-news-announcements/edgar-release-263)).
+  Insider Transactions (Forms 3/4/5) and Form 13F data sets remain
+  quarterly; no new bulk dataset was announced.
+
+### What this changes
+
+Nothing today. Three items for `sources.yaml`, proposed as questions in the
+PR rather than edited: pin Coinalyze at 40/min and Alpha Vantage at 25/day
+in the notes, replace the Polymarket "~60/100 req/min" note with the
+documented per-endpoint figures, and decide whether Kalshi's keyless read
+API becomes Odds's second source.

@@ -120,3 +120,99 @@ move them back and keep the ledger rows as the record. If gpt-oss's
 challenges are not separating winners from losers (`challenge_report`), the
 adversary needs a stronger model in the pool's first slot. The roster is a
 hypothesis; the ledger is the test.
+
+---
+
+## Update 2026-09-23
+
+Routine refresh. **Same caveat as the page header:** huggingface.co,
+arxiv.org, openai.com, z.ai, deepseek.com, qwen.ai and artificialanalysis.ai
+were egress-blocked from this session too. Every figure below is the search
+engine's excerpt of the named primary page, and each line says whether the
+figure is the vendor's own or an independent evaluation. Nothing is written
+from memory; where the number could not be seen it is marked unverified.
+
+### The finance benchmark this page cites, now traced to its source
+
+The 88.4% figure in the header and in Ledger's `why` comes from
+*Can Open-Weight Models Compete on Financial Text Comprehension?*, arXiv
+2608.08634, Jan Spörer, University of St. Gallen, submitted 2026-08-09
+([abs](https://arxiv.org/abs/2608.08634)). Independent, academic. The
+abstract as excerpted: the 2026 update of Financial Touchstone has 2,967
+question-context-answer triplets over 495 annual reports and twenty models
+from ten providers; Claude Opus 4.6 has the highest accuracy at 88.4%,
+Gemini 2.5 Pro the lowest hallucination rate at 0.08%, Kimi K2.6 is third,
+the non-reasoning GLM 5 and Mistral 3 fourth and fifth, and retrieval
+accounts for 48.9% of all failures.
+
+Two things to carry when citing it:
+
+- There are **two editions**. The original (ACM ICAIF 2025, eleven models,
+  [doi](https://dl.acm.org/doi/10.1145/3768292.3770417)) has Gemini 2.5 Pro
+  at 91.6% and does not include Opus 4.6. A "Financial Touchstone" number
+  without an edition is ambiguous; the roster's number is the 2026 one.
+- Every model got the same top-5 retrieved chunks, so the accuracy gap is
+  the reader, not the retriever. That is the right comparison for Ledger,
+  which is fed by adapters.
+
+The BizFinBench.v2 figures (Qwen3-235B-A22B-Thinking-2507 at 53.3%, best
+open model; Dianjin-R1 at 35.7%, trailing Qwen3-32B by 5.6 points; an 8.2
+point gap to GPT-5; 21 models) are as the abstract of arXiv 2601.06401 is
+excerpted ([abs](https://arxiv.org/abs/2601.06401)). Independent, though
+the authors are a Chinese brokerage's research group. No new BizFinBench or
+Financial Touchstone results were found since 2026-09-15.
+
+### Open-weight releases since the page was written
+
+- **Qwen3.8-27B** (Apache-2.0, 2026-08-14 per the QwenLM/Qwen3.8 news list)
+  supersedes the Qwen3.6-27B this page rosters
+  ([Qwen3.6-27B card](https://huggingface.co/Qwen/Qwen3.6-27B), released
+  2026-04-22, 262,144 native context). The roster ids are families and the
+  box pins the version, so nothing breaks, but the four adapter-fed seats
+  are on a checkpoint one generation old. **Question for Max:** move the
+  pin, or wait for a finance number on 3.8.
+- **Ternary Bonsai 2 27B** (PrismML, 2026-09-17, Apache-2.0): a ternary
+  compression of Qwen3.8-27B at about 5.9 GB with 262K context. The vendor
+  claims 98.2% of the FP16 benchmark average
+  ([card](https://huggingface.co/prism-ml/Ternary-Bonsai-2-27B-gguf)).
+  **Vendor claim, no independent evaluation, no finance benchmark.** Not
+  for the roster until someone else has measured it.
+- **Ling-3.0-flash-Fin** (Ant Group, 2026-09-16, MIT, 124B total / 5.1B
+  active MoE, 256K context;
+  [card](https://huggingface.co/inclusionAI/Ling-3.0-flash-Fin)). A finance
+  fine-tune, so the header's rule applies. The vendor card lists finance
+  evals (FinFIRST, FinSearchComp, Finance Agent, τ³-Banking); the numbers
+  could not be read and are **unverified**. The one independent figure
+  found is Artificial Analysis's Finance & Accounting Index at 24 against a
+  leader at 56 ([changelog](https://artificialanalysis.ai/changelog),
+  index v1.1 dated 2026-09-16, search excerpt). Consistent with "finance
+  fine-tunes trail general models"; not a reason to change anything.
+- **MiMo-V2.6-Flash** (Xiaomi, 2026-09-22, MIT, 309B total / 15B active,
+  1M context, [card](https://huggingface.co/XiaomiMiMo/MiMo-V2.6-Flash-RL)).
+  Vendor-announced. Hosted-only at that size; a second MIT 1M-context option
+  beside DeepSeek-V4.1-Flash, and no finance number yet.
+- **Kimi K3** is now on Amazon Bedrock (AWS what's-new, 2026-09-18,
+  [note](https://aws.amazon.com/about-aws/whats-new/2026/09/moonshot-ai-kimi-k3-on-amazon-bedrock/)).
+  The licence is the custom "Kimi K3 License" with a revenue-threshold
+  clause ([repo](https://github.com/MoonshotAI/Kimi-K3)), which is what the
+  header meant by "conditions". Vendor README finance figures exist
+  (CorpFin v2, Finance Agent v2, τ³-Banking) and are **vendor-reported**;
+  not written here as numbers.
+- **Qwen3.8-Max** is an API name. The open weights ship as
+  `Qwen/Qwen3.8-2.4T-A95B` (2026-08-12, custom "Qwen3.8-Max License",
+  2.4T / 95B active, 262K context). No page named "Qwen3.8-Max" exists on
+  Hugging Face; the header's line is right on the licence and should be
+  read with the real weight name.
+
+### The rostered open models: no change
+
+- **gpt-oss-120b**: Apache-2.0, 117B total / 5.1B active, single 80 GB GPU
+  per the GitHub README; released 2025-08-05, no 2026 update found. Context
+  length unverified from the card.
+- **DeepSeek-V4.1-Flash**: MIT, 552B, 8B active prefill / 16B decode, 1M
+  context; released 2026-09-10 ([news](https://www.deepseek.com/en/news/deepseek-v4-1-flash/)).
+- **GLM-5.3-Flash**: MIT, 320B / 18B active, 1,048,576 context; weights
+  2026-08-25 ([blog](https://z.ai/blog/glm-5.3-flash)).
+
+Jev's default is unchanged. The adversary pool has no new member worth
+adding on evidence rather than on a vendor card.
